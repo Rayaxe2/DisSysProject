@@ -29,8 +29,8 @@ public class RController { //Previously called PingPongEndpoint
 	}
 
 	@PostMapping("/MultiplyMatrix")
-	public String matrix (@RequestParam(value = "Matrix_A") String matrixA, @RequestParam(value = "Matrix_B") String matrixB, @RequestParam(value = "noOfRows") int noOfRows){
+	public String matrix (@RequestParam(value = "Matrix_A") String matrixA, @RequestParam(value = "Matrix_B") String matrixB, @RequestParam(value = "noOfRows") int noOfRows, @RequestParam(value = "deadline") int deadline){
 		//Hands the 2 matrix inputs to the grpc client's "matrixOperations" function so it can process it and provide a response - the number of rows in the matrix is specified so the input can be formatted
-		return grpcClientService.matrixOperations(matrixA, matrixB, noOfRows);
+		return grpcClientService.matrixOperations(matrixA, matrixB, noOfRows, deadline);
 	}
 }

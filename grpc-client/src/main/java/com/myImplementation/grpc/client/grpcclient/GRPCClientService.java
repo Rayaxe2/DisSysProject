@@ -20,7 +20,7 @@ import com.myImplementation.grpc.MatrixMultServiceGrpc;
 @Service
 public class GRPCClientService {
 
-	public String matrixOperations(String mA, String mB, int dimentions){
+	public String matrixOperations(String mA, String mB, int dimentions, int deadline){
 		//"localhost" is the IP of the server we want to connect to - 9090 is it's port
 		ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 9090).usePlaintext().build();
 		//create a stub and pass the channel in as a variable
@@ -71,7 +71,7 @@ public class GRPCClientService {
 
 		long endTime = System.nanoTime();
 		long footprint = endTime - startTime;
-		int serversNeeded = Math.ceil((footprint*numBlockCalls)/deadline);
+		double serversNeeded = Math.ceil((footprint*((dim*dim)/4))/deadline);
 
 		//Closes channel
 		channel.shutdown();
@@ -83,7 +83,7 @@ public class GRPCClientService {
 	static int[][][][] matrixToBlockList(int A[][], int B[][]) { //, MatrixServiceGrpc.MatrixServiceBlockingStub stub
 		int matrixDim = A.length;
 		//Amount of blocks that matrix can be split into (amount of elements devided by 4 (since blocks are 2x2))
-		int blocksInMatrix = (size*size)/4;
+		int blocksInMatrix = (int) Math.ceil((matrixDim * matrixDim)/4);
 
 		//The 2d Arrays will be laid out into a 1D array and stored ere
 		int[] TwoToOneDA = new int[matrixDim*matrixDim];
@@ -94,7 +94,7 @@ public class GRPCClientService {
 		int[][][] listOfBlocksB = new int[blocksInMatrix][2][2];
 
 		//listOfBlocksA and listOfBlocksB are stored here
-		int[][][][] listOfBlocksA&B = new int[2][blocksInMatrix][2][2];
+		int[][][][] listOfBlocksAandB = new int[2][blocksInMatrix][2][2];
 
 		//Blocks will be placed here will retrieved/built
 		int[][] tempBlockA = new int[2][2];
@@ -114,42 +114,38 @@ public class GRPCClientService {
 		for(int i = 0; i < blocksInMatrix; i++) {
 			//Incrememted by 2 since the first 2 elements of the current possition is put into the block per loop
 			for (int j = 0; j < listOfBlocksA.length; j = j + 2){
-				tempBlockA[0][0] = listOfBlocksA[j];
-				tempBlockB[0][0] = listOfBlocksB[j];
+				tempBlockA[0][0] = TwoToOneDA[j];
+				tempBlockB[0][0] = TwoToOneDB[j];
 
-				tempBlockA[0][1] = listOfBlocksA[j+1];
-				tempBlockB[0][1] = listOfBlocksB[j+1];
+				tempBlockA[0][1] = TwoToOneDA[j+1];
+				tempBlockB[0][1] = TwoToOneDB[j+1];
 
-				tempBlockA[1][0] = listOfBlocksA[j+matrixDim];
-				tempBlockB[1][0] = listOfBlocksB[j+matrixDim];
+				tempBlockA[1][0] = TwoToOneDA[j+matrixDim];
+				tempBlockB[1][0] = TwoToOneDB[j+matrixDim];
 
-				tempBlockA[1][1] = listOfBlocksA[j+matrixDim+1];
-				tempBlockB[1][1] = listOfBlocksB[j+matrixDim+1];
+				tempBlockA[1][1] = TwoToOneDA[j+matrixDim+1];
+				tempBlockB[1][1] = TwoToOneDB[j+matrixDim+1];
 			}
 			//Puts blocks into list of blocks
-			matrixABlocks[i] = tempBlockA;
-			matrixBBlocks[i] = tempBlockB;
+			listOfBlocksA[i] = tempBlockA;
+			listOfBlocksB[i] = tempBlockB;
 		}
 
 		//Puts lists of blocks into 4D block to return
-		listOfBlocksA&B[0] = listOfBlocksA;
-		listOfBlocksA&B[1] = listOfBlocksB;
+		listOfBlocksAandB[0] = listOfBlocksA;
+		listOfBlocksAandB[1] = listOfBlocksB;
 
-		return listOfBlocksA;
+		return listOfBlocksAandB;
 	}
 
 	//Converts 2D array matrix blocks into lists that can be passed to the stub
 	static List<List<com.myImplementation.grpc.array>> blocksToGRPCList(int A[][], int B[][]){
-		//Makes a list of lists (of the a type the makes what GRPC accepts) to store 2D array A and 2D array B
-		List<List<com.myImplementation.grpc.array>> matrixLists = new List<List<com.myImplementation.grpc.array>>();
-
-		//The 2 respective 2D arrays will be placed into these lists
-		List<List<com.myImplementation.grpc.array>> lA = List<List<com.myImplementation.grpc.array>>();
-		List<List<com.myImplementation.grpc.array>> lB = List<List<com.myImplementation.grpc.array>>();
+		//Makes a list of lists (of the a type the makes what GRPC accepts) to store 2D array A and B
+		List<List<com.myImplementation.grpc.array>> matrixLists = new ArrayList<List<com.myImplementation.grpc.array>>();
 
 		//Places aformentioned lists in the aforementioned list of lists construct
-		matrixLists.add(TwoDimArrayToTwoDimList(lA));
-		matrixLists.add(TwoDimArrayToTwoDimList(lB));
+		matrixLists.add(TwoDimArrayToTwoDimList(A));
+		matrixLists.add(TwoDimArrayToTwoDimList(B));
 
 		return matrixLists;
 	}
