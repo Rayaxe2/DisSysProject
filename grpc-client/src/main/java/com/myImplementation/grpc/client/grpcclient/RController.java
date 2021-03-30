@@ -19,12 +19,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
 @RestController
-public class RestController { //Previously called PingPongEndpoint
+public class RController { //Previously called PingPongEndpoint
 	GRPCClientService grpcClientService;
 
 	//Assigns client service
 	@Autowired
-	public RestController(GRPCClientService grpcClientService) {
+	public RController(GRPCClientService grpcClientService) {
 		this.grpcClientService = grpcClientService;
 	}
 

@@ -12,34 +12,40 @@ import io.grpc.ManagedChannelBuilder;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Service;
+import java.util.*;
 
-//import com.myImplementation.grpc...
+//Request and response message from proto
+import com.myImplementation.grpc.multiplyBlockRequest;
+import com.myImplementation.grpc.multiplyBlockResponse;
+//Proto builds MatrixServiceGrpc
+import com.myImplementation.grpc.MatrixMultServiceGrpc;
 
 @Service
 public class GRPCClientService {
 
-	public String matrixOperations(String mA, String mB, String dimentions){
+	public String matrixOperations(String mA, String mB, int dimentions){
 		//"localhost" is the IP of the server we want to connect to - 9090 is it's port
 		ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 9090).usePlaintext().build();
 		//create a stub and pass the channel in as a variable
-		PingPongServiceGrpc.PingPongServiceBlockingStub stub = MatrixMultServiceGrpc.newBlockingStub(channel);
+		MatrixMultServiceGrpc.MatrixMultServiceBlockingStub stub = MatrixMultServiceGrpc.newBlockingStub(channel);
 
 		//The rest controller gives the array as a string of numbers seperated by commas, we put that in a 1d string array first
 		String[] a1D = mA.split(",");
-		String[] b1D = mb.split(",");
+		String[] b1D = mB.split(",");
 
 		//Dimentions of the matrix - th number of rows will always be the same as the number of columns
-		int dim = Integer.parseInt(dimentions);
+		int dim = dimentions;
 
 		//Limit it to dimentions to the power of 2? ...
-		if(!(a1D.length ==  (dim * dim) || b1D.length == (dim * dim))){
+		if(!(a1D.length ==  (dim * dim) && b1D.length == (dim * dim))){
 			multiplyBlockResponse reply = stub.multiplyBlock(
 					multiplyBlockRequest.newBuilder()
-							.clearMatrixC()
-							.setC("One or both of the matricies are/is not square")
+							.clearError()
+							.setError("One or both of the matricies are/is not square")
 							.build()
 			);
-			return reply.getMatrixC();
+			channel.shutdown();
+			return "Error: Make sure both matracies have the dimentions " + Integer.toString(dim) + "x" + Integer.toString(dim);
 		}
 
 		//Container for array once split into an array of arrays/2d array
@@ -67,21 +73,21 @@ public class GRPCClientService {
 		//Closes channel
 		channel.shutdown();
 
-		//Makes funciton return the result of the operation/service
-		return reply.getMatrixC(); //Matrix C is a string - change?
+		//Makes funciton return the result of the operation/service to the rest controller - which calls it
+		return listUnpackToString(reply.getMatrixCList());
 	}
 
 	//Packs 2D array into list of repeated
-	static List<com.grpc.myImplementation.array> TwoDimArrayToTwoDimList(int A[][])
+	static List<com.myImplementation.grpc.array> TwoDimArrayToTwoDimList(int A[][])
 	{
 		//Makes new array list that conforms to the repeated "array" messages data strcuture (where array is repeated ints) in proto
-		List<com.grpc.myImplementation.array> listA = new ArrayList<com.grpc.lab1.array>();
+		List<com.myImplementation.grpc.array> listA = new ArrayList<com.myImplementation.grpc.array>();
 
 		//Goes through each array within the 2d array and adds them to the list construct created prior
 		for(int[] innerArray : A)
 		{
-			//Creates a builder for the "com.grpc.myImplementation.array" objects we want to store in a list
-			com.grpc.myImplementation.array.Builder arraySubSet = com.grpc.myImplementation.array.newBuilder();
+			//Creates a builder for the "com.myImplementation.grpc.array" objects we want to store in a list
+			com.myImplementation.grpc.array.Builder arraySubSet = com.myImplementation.grpc.array.newBuilder();
 			//converts array of ints into a list of Integer objects and then adds them to the builder
 			arraySubSet.addAllItem(array2List(innerArray));
 			//Adds the built object to the previously declare list
@@ -99,5 +105,23 @@ public class GRPCClientService {
 			listA.add(A[i]);
 		}
 		return listA;
+	}
+
+	static String listUnpackToString(List<com.myImplementation.grpc.array> A)
+	{
+		String arrayInString = "[";
+
+		for (int x = 0; x < A.size(); x++)
+		{
+
+			for (int y = 0; y < A.get(x).getItemCount(); y++)
+			{
+				arrayInString += String.valueOf(A.get(x).getItem(y)) + ", ";
+			}
+			arrayInString = arrayInString.substring(0, arrayInString.length() - 2);
+			arrayInString += "]\n[";
+		}
+
+		return arrayInString.substring(0, arrayInString.length() - 2);
 	}
 }
