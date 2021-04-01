@@ -1,5 +1,5 @@
 //location of file
-package com.example.grpc.server.grpcserver;
+package com.myImplementation.grpc.server.grpcserver;
 
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
@@ -10,6 +10,9 @@ import com.myImplementation.grpc.multiplyBlockResponse;
 
 //matrixMultServiceImpBase generated from proto file
 import com.myImplementation.grpc.MatrixMultServiceGrpc.MatrixMultServiceImplBase;
+
+import com.myImplementation.grpc.server;
+import com.myImplementation.grpc.MatrixMultService;
 
 import io.grpc.stub.StreamObserver;
 
@@ -22,55 +25,81 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 	@Override
 	//StreamObserver<multiplyBlockResponse> reply lets you do async communication if you want
 	public void multiplyBlock(multiplyBlockRequest request, StreamObserver<multiplyBlockResponse> reply) {
+		//If the matricies are not square then the reply informs the user
 		if (request.getError().equals("One or both of the matricies are/is not square")) {
 			multiplyBlockResponse.Builder response = multiplyBlockResponse.newBuilder();
 			reply.onNext(response.build());
 			reply.onCompleted();
 		}
+		//If the matricies are not n^2 such that n is an even number, the reply informs the user
+		else if (request.getError().equals("The matracies are not n^2 large")) {
+			multiplyBlockResponse.Builder response = multiplyBlockResponse.newBuilder();
+			reply.onNext(response.build());
+			reply.onCompleted();
+		}
 		else {
+			//Puts the matracies from the request data into lists
 			List<com.myImplementation.grpc.array> listA = request.getMatrixAList();
 			List<com.myImplementation.grpc.array> listB = request.getMatrixBList();
 
+			//Places the List<com.myImplementation.grpc.array> data into a 2D array to make it easier to handle
 			int[][] Array1 = listUnpack(listA);
 			int[][] Array2 = listUnpack(listB);
 
-			int[][] multProduct = multiplyBlockAux2(Array1, Array2); //multiplyMatrixBlockAux(Array1, Array2)
+			//Mutliplies the matracies (which will always be 2x2 blocks)
+			int[][] multProduct = multiplyBlockAux(Array1, Array2);
 
-			//Print out a message saying you received a message from the client
+			//Print out a message saying you received a message from the client - for the server to see/display
 			System.out.println("Multiplication Request recieved from client:\n" + request);
 
-			//build a response
+			//builds a response
 			multiplyBlockResponse.Builder response = multiplyBlockResponse.newBuilder();
 
+			//Converts 2D array structure back into the List<com.myImplementation.grpc.array>, since 2D arrays can not be send in requests and responses
+			//But List<com.myImplementation.grpc.array> structures can
 			for (int[] innerArray : multProduct) {
 				com.myImplementation.grpc.array.Builder arraySubSet = com.myImplementation.grpc.array.newBuilder();
 				arraySubSet.addAllItem(array2List(innerArray));
 				response.addMatrixC(arraySubSet.build());
 			}
-
-			//matrixC - matrixC value is defined in proto file as the only value of the reply
+			//specifies we want to send the reply on the next iteration
 			reply.onNext(response.build());
+			//Then marks it as complete
 			reply.onCompleted();
 		}
 	}
 
 	@Override
 	public void addBlock(multiplyBlockRequest request, StreamObserver<multiplyBlockResponse> reply) {
+		//If the matricies are not square then the reply informs the user
 		if (request.getError().equals("One or both of the matricies are/is not square")) {
 			multiplyBlockResponse.Builder response = multiplyBlockResponse.newBuilder();
 			reply.onNext(response.build());
 			reply.onCompleted();
 		}
+		//If the matricies are not n^2 such that n is an even number, the reply informs the user
+		else if (request.getError().equals("The matracies are not n^2 large")) {
+			multiplyBlockResponse.Builder response = multiplyBlockResponse.newBuilder();
+			reply.onNext(response.build());
+			reply.onCompleted();
+		}
 		else {
+			//Places the matracies from the request data into lists
 			List<com.myImplementation.grpc.array> listA = request.getMatrixAList();
 			List<com.myImplementation.grpc.array> listB = request.getMatrixBList();
 
+			//Places the List<com.myImplementation.grpc.array> data into a 2D array to make it easier to handle
 			int[][] Array1 = listUnpack(listA);
 			int[][] Array2 = listUnpack(listB);
-			int[][] addProduct = addBlockAux2(Array1, Array2); //addBlockAux
 
+			//Adds the matracies
+			int[][] addProduct = addBlockAux(Array1, Array2); //addBlockAux
+
+			//Print out a message saying you received a message from the client - for the server to see/display
 			System.out.println("Add Request recieved from client:\n" + request);
 
+			//Converts 2D array structure back into the List<com.myImplementation.grpc.array>, since 2D arrays can not be send in requests and responses
+			//But List<com.myImplementation.grpc.array> structures can
 			multiplyBlockResponse.Builder response = multiplyBlockResponse.newBuilder();
 			for (int[] innerArray : addProduct) {
 				com.myImplementation.grpc.array.Builder arraySubSet = com.myImplementation.grpc.array.newBuilder();
@@ -82,9 +111,12 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 		}
 	}
 
-	// multiplyBlock
+	//Functions used for adding and mutliplying
+	//<================>
+
+	// multiplyBlock - provided in lab 1
 	static int[][] multiplyBlockAux(int A[][], int B[][]) {
-		int MAX = 4;
+		int MAX = 2;
 		int C[][]= new int[MAX][MAX];
 		C[0][0]=A[0][0]*B[0][0]+A[0][1]*B[1][0];
 		C[0][1]=A[0][0]*B[0][1]+A[0][1]*B[1][1];
@@ -93,9 +125,9 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 		return C;
 	}
 
-	//addBlock
+	//addBlock - provided in lab 1
 	static int[][] addBlockAux(int A[][], int B[][]) {
-		int MAX = 4;
+		int MAX = 2;
 		int C[][]= new int[MAX][MAX];
 		for (int i=0;i<C.length;i++)
 		{
@@ -107,6 +139,66 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 		return C;
 	}
 
+	//Useful Auxilary functions - alternative functions for multiplication and addition
+	//<================>
+	//Dynamic Multiplication - takes an array of blocks that repesent a matrix broken down into 2x2 blocks and carries out matrix multiplication
+	static int[][][] dynamicMatrixMultiplication(int blocksA[][][], int blocksB[][][]) {
+		int dim = (int) Math.sqrt(blocksA.length);
+		int[][][] blocksOfMultResult = new int[blocksA.length][blocksA[0].length][blocksA[0][0].length];
+
+		for(int i = 0; i < blocksA.length; i++){
+			for(int j = 0; j < dim; j++){
+				blocksOfMultResult[i] = addBlockAux(blocksOfMultResult[i], multiplyBlockAux(blocksA[j + (dim * (int) Math.floor(i/dim))], blocksB[(j * dim) + (i % dim)]));
+			}
+		}
+		return blocksOfMultResult;
+	}
+
+	//Dynamic Addition - takes an array of blocks that repesent a matrix broken down into 2x2 blocks and carries out matrix addition
+	static int[][][] dynamicMatrixAddition(int blocksA[][][], int blocksB[][][]) {
+		int dim = (int) Math.sqrt(blocksA.length);
+		int[][][] blocksOfAdditionResult = new int[blocksA.length][blocksA[0].length][blocksA[0][0].length];
+
+		for(int i = 0; i < blocksA.length; i++){
+				blocksOfAdditionResult[i] = addBlockAux(blocksA[i], blocksB[i]);
+		}
+		return blocksOfAdditionResult;
+	}
+
+	//Naive Matrix adding
+	static int[][] addBlockAux2(int A[][], int B[][]) {
+		//Result will be stored in this array - it will be the same dimentions as A and B and will be square
+		int[][] C = new int[A.length][A.length];
+
+		//Loops through each element in both matricies/arrays, adds them and stores the results in the new array C
+		for (int i = 0; i < A.length; i++)
+		{
+			for (int j = 0; j < A.length; j++)
+			{
+				C[i][j] = A[i][j]+B[i][j];
+			}
+		}
+
+		return C;
+	}
+
+	//Naive Multiplying
+	static int[][] multiplyBlockAux2(int A[][], int B[][]) {
+		//Stores results
+		int[][] C = new int[A.length][A.length];
+
+		for (int a = 0; a < A.length; a++) {
+			for (int b = 0; b < A.length; b++) {
+				for (int c = 0; c < A.length; c++) {
+					//Goes through array A column-wise and goes through B row-wise and multiplies the results them adds the adds ther result to revious calculations
+					C[a][b] += A[a][c] * B[c][b];
+				}
+			}
+		}
+		return C;
+	}
+
+	//multiplyMatrixBlockAux - provided in lab 1
 	static int[][] multiplyMatrixBlockAux( int A[][], int B[][]) {
 		int MAX = 4;
 		int bSize=2;
@@ -198,42 +290,10 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 		return res;
 	}
 
-	//<==============================================>
-	//Naive Matrix adding
-	static int[][] addBlockAux2(int A[][], int B[][]) {
-		//Result will be stored in this array - it will be the same dimentions as A and B and will be square
-		int[][] C = new int[A.length][A.length];
-
-		//Loops through each element in both matricies/arrays, adds them and stores the results in the new array C
-		for (int i = 0; i < A.length; i++)
-		{
-			for (int j = 0; j < A.length; j++)
-			{
-				C[i][j] = A[i][j]+B[i][j];
-			}
-		}
-
-		return C;
-	}
-
-	//Naive Multiplying
-	static int[][] multiplyBlockAux2(int A[][], int B[][]) {
-		//Stores results
-		int[][] C = new int[A.length][A.length];
-
-		for (int a = 0; a < A.length; a++) {
-			for (int b = 0; b < A.length; b++) {
-				for (int c = 0; c < A.length; c++) {
-					//Goes through array A column-wise and goes through B row-wise and multiplies the results them adds the adds ther result to revious calculations
-					C[a][b] += A[a][c] * B[c][b];
-				}
-			}
-		}
-		return C;
-	}
-
-	//<==============================================>
 	//Extra functions of list packing and uppacking
+	//<========================>
+
+	//Converts 1D array into a list of integers
 	static List<Integer> array2List(int A[]) {
 		List<Integer> listA = new ArrayList<Integer>();
 		for(int i = 0; i<(A.length); i++)
@@ -243,6 +303,7 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 		return listA;
 	}
 
+	//Converts 2D array into a list of string lists
 	static List<List<String>> listRepack(int A[][]) {
 		List<List<String>> listA = new ArrayList<List<String>>();
 		for(int i = 0; i<(A.length); i++)
@@ -257,6 +318,7 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 		return listA;
 	}
 
+	//Converts List<com.myImplementation.grpc.array> stuctures into 2D arrays
 	static int[][] listUnpack(List<com.myImplementation.grpc.array> A)  {
 		int[][] ArrayA = new int[A.size()][A.get(0).getItemCount()];
 
@@ -272,9 +334,9 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 	}
 }
 
-//<=============================>
-
 /*
+//Code used for guidance - ignore
+
 @GrpcService
 //In PingPongService.proto there is the service "PingPongService"
 public class PingPongServiceImpl extends PingPongServiceGrpc.PingPongServiceImplBase { //PingPongServiceImplBase is generated from the proto file and deals with basic network communication

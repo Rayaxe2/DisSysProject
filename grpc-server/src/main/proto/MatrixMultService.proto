@@ -1,6 +1,6 @@
 syntax = "proto3";
 option java_multiple_files = true;
-package com.grpc.lab1;
+package com.myImplementation.grpc;
 
 message array {
 	repeated int32 item = 4 [packed=true];
@@ -9,13 +9,15 @@ message array {
 message multiplyBlockRequest {
     repeated array matrixA = 1;
     repeated array matrixB = 2;
+	string error = 4;
 }
 
 message multiplyBlockResponse {
-    string matrixC = 3;
+    repeated array matrixC = 3;
 }
 
 service MatrixMultService {
     rpc multiplyBlock(multiplyBlockRequest) returns (multiplyBlockResponse);
 	rpc AddBlock(multiplyBlockRequest) returns (multiplyBlockResponse);
 }
+
