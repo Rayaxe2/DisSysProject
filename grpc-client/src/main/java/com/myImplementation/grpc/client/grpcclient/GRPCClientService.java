@@ -1,4 +1,3 @@
-//location of file
 package com.example.grpc.client.grpcclient;
 
 import io.grpc.ManagedChannel;
@@ -8,6 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.*;
 import java.lang.Math;
 
 //Request and response message from proto
@@ -23,11 +24,10 @@ public class GRPCClientService {
 	//Breaks matricies into blocks, and orders threads to carry out matrix multiplication with the blocks and returns the result a formatted string
 	public String matrixMultiplicationOperation(String mA, String mB, int dimentions, int deadline) {
 		//Server IPs
-		String[] serverIPs = new String[8];
-		serverIPs = {"18.208.144.93", "3.89.220.217", "3.80.26.40", "184.72.110.77", "54.208.143.214", "18.204.206.212", "18.205.29.165", "34.224.94.243"};
+		String[] serverIPs = new String[]{"18.208.144.93", "3.89.220.217", "3.80.26.40", "184.72.110.77", "54.208.143.214", "18.204.206.212", "18.205.29.165", "34.224.94.243"};
 
 		//"localhost" is the IP of the server we want to connect to - 9090 is it's port
-		ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[i], 8081).usePlaintext().build();
+		ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[0], 8081).usePlaintext().build();
 		//create a stub and pass the channel in as a variable
 		MatrixMultServiceGrpc.MatrixMultServiceBlockingStub stub = MatrixMultServiceGrpc.newBlockingStub(channel);
 
@@ -85,14 +85,14 @@ public class GRPCClientService {
 		//E.G. To Multiply 2 4x4 matricies, 4 operations need to be done (on the 4 2x2 blocks in the matrix)
 		//Each operation will need 4 blocks (2 specifc ones from A and 2 specifc ones from from B) to be multiplied to get an anwser
 		//So 16 blocks will be needed, 4 for each atomic operation
-		List<List<Integer[][]>> atomicBlockOPQueue = new ArrayList<>();
+		List<List<Integer[][]>> atomicBlockOPQueue = new ArrayList<List<Integer[][]>>();
 
 		//Selects the specific blocks needed to calculate a block of the final matrix
-		for (i = 0; i < allBlocks[0].length; i++) {
+		for (int i = 0; i < allBlocks[0].length; i++) {
 			List<Integer[][]> newQueue = new ArrayList<>();
-			for (j = 0; j < dim; j++) {
-				newQueue.add(allBlocks[1][(j * dim) + (i / dim)]);
-				newQueue.add(allBlocks[0][j + (dim * (i / dim))]);
+			for (int j = 0; j < dim; j++) {
+				newQueue.add(IntArrayToIntergerArray(allBlocks[1][(j * dim) + (i / dim)]));
+				newQueue.add(IntArrayToIntergerArray(allBlocks[0][j + (dim * (i / dim))]));
 			}
 			atomicBlockOPQueue.add(newQueue);
 		}
@@ -108,8 +108,8 @@ public class GRPCClientService {
 				multiplyBlockRequest.newBuilder()
 						.clearMatrixA()
 						.clearMatrixB()
-						.addAllMatrixA(TwoDimArrayToTwoDimList(atomicBlockOPQueue.get(0).get(0)))
-						.addAllMatrixB(TwoDimArrayToTwoDimList(atomicBlockOPQueue.get(1).get(0)))
+						.addAllMatrixA(TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(0))))
+						.addAllMatrixB(TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(1).get(0))))
 						.build()
 		);
 		//Stores the time after gRPC functiona call
@@ -124,22 +124,26 @@ public class GRPCClientService {
 
 
 		//These theards will be used to send gRPC service requests concurrently (eliminating the need to wait for a response before sending another request)
-		Executor serverThreadPool = Executors.newFixedThreadPool(serversNeeded);
+		ExecutorService serverThreadPool = Executors.newFixedThreadPool(serversNeeded);
 		//Stores of list/pool of stubs for the threads to use
-		list<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub> listOfStubs = new ArrayList<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub>();
+		List<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub> listOfStubs = new ArrayList<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub>();
 		//Creates "serversNeeded" many stubs and stores them in the aforementioned list
-		for (i = 0; i < serversNeeded; i++) {
-			ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[i], 8081).usePlaintext().build();
+		for (int i = 0; i < serversNeeded; i++) {
+			channel = ManagedChannelBuilder.forAddress(serverIPs[i], 8081).usePlaintext().build();
 			listOfStubs.add(MatrixMultServiceGrpc.newBlockingStub(channel));
 		}
 
 		//This will store the results of each thread
-		List<Future<multiplyBlockResponse>> futureResults = new ArrayListFuture<multiplyBlockResponse> > ();
+		List<Future<List<com.myImplementation.grpc.array>>> futureResults = new ArrayList<Future<List<com.myImplementation.grpc.array>>>();
 
-		for (i = 0; i < atomicBlockOPQueue.length; i++) {
+		for (int i = 0; i < atomicBlockOPQueue.size(); i++) {
 			//The pool of stubs and set of relevant blocks are sent to be used for the multiplication operations,
 			// which the thread pool executes. The results are collected and stored in the list of future, "futureResults"
-			futureResults.add(serverThreadPool.submit(new gRPCBlockMultiplication(listOfStubs, atomicBlockOPQueue.get(i))));
+			futureResults.add(
+					serverThreadPool.submit(
+							new gRPCBlockMultiplication(listOfStubs, atomicBlockOPQueue.get(i))
+					)
+			);
 		}
 
 		//Shuts down the server once it's done processing the reaming threads
@@ -149,10 +153,18 @@ public class GRPCClientService {
 		List<Integer[][]> listOfResults = new ArrayList<Integer[][]>();
 
 		//PLaces the resulting matrix blocks into a list of blocks
-		for (i = 0; i < futureResults.length; i++) {
+		for (int i = 0; i < futureResults.size(); i++) {
+			try {
 			listOfResults.add(
-					listUnpack(futureResults.get(i).getMatrixCList())
+					IntArrayToIntergerArray(listUnpack(futureResults.get(i).get()))
 			);
+			}
+			catch (ExecutionException e){
+				e.printStackTrace();
+			}
+			catch (InterruptedException e){
+				e.printStackTrace();
+			}
 		}
 		//Makes funciton return the result of the operation/service to the rest controller - which calls it
 		return listOfBlocksToString(listOfResults); //listOfBlocksToString converts the lits of blocks into a formatted string
@@ -162,7 +174,7 @@ public class GRPCClientService {
 	//<=======================>
 
 	//Callable thread function for mutliplication
-	static class gRPCBlockMultiplication implements Callable<multiplyBlockResponse> {
+	static class gRPCBlockMultiplication implements Callable<List<com.myImplementation.grpc.array>> {
 		//Stores the pool of stubs to use to send gRPC functions
 		List<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub> stubPool;
 		//Stores array of matrix blocks
@@ -172,23 +184,25 @@ public class GRPCClientService {
 		//Takes arrays of stubs and the blocks in matrix A and B and places them in the above variables
 		public gRPCBlockMultiplication(List<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub> stubs, List<Integer[][]> blks) {
 			this.stubPool = stubs;
-			for (i = 0; i < blks.length; i = i + 2) {
-				this.unprocessedBlockA[i / 2] = blksA.get(i);
-				this.unprocessedBlockB[i / 2] = blksB.get(i + 1);
+			for (int i = 0; i < blks.size(); i = i + 2) {
+				this.unprocessedBlockA[i / 2] = IntergerArrayToIntArray(blks.get(i));
+				this.unprocessedBlockB[i / 2] = IntergerArrayToIntArray(blks.get(i + 1));
 			}
 		}
 
 		//Adds process to the threadpool's queue which take some of the block provided and mutliplies them with certain other blocks
 		//Each process to a different stub on a rotational basis to make sure not all process are sent to the same server (tubPool.get(i % blksA.length))
 		//The results of the multiplicate are added together via the matrix addition gRCP function
-		@Overide
-		public multiplyBlockResponse call() throws Exception {
+		@Override
+		public List<com.myImplementation.grpc.array> call() {
 			//The result of each block multiplication should be accumilated here
 			List<com.myImplementation.grpc.array> resultingMatrix = new ArrayList<com.myImplementation.grpc.array>();
 
+			multiplyBlockResponse blockMultiplicationResponse;
+
 			//Goes through each blocks in the operation set (the set of blocks that need to be mutliplied and added)
-			for (i = 0; i < blksA.length; i++) {
-				multiplyBlockResponse blockMultiplicationResponse = stubPool.get(i % blksA.length).multiplyBlock(
+			for (int i = 0; i < unprocessedBlockA.length; i++) {
+				blockMultiplicationResponse = stubPool.get(i % unprocessedBlockA.length).multiplyBlock(
 						multiplyBlockRequest.newBuilder()
 								.clearMatrixA()
 								.clearMatrixB()
@@ -198,7 +212,7 @@ public class GRPCClientService {
 				);
 				//Accumilates the results of the multiplication into a single block
 				if (i > 0) {
-					multiplyBlockResponse blockMultiplicationResponse = stubPool.get(i % blksA.length).addBlock(
+					blockMultiplicationResponse = stubPool.get(i % unprocessedBlockA.length).addBlock(
 							multiplyBlockRequest.newBuilder()
 									.clearMatrixA()
 									.clearMatrixB()
@@ -221,13 +235,12 @@ public class GRPCClientService {
 		public gRPCBlockMultiplication() {
 		}
 
-		@Overide
+		@Override
 		public multiplyBlockResponse call() throws Exception {
 		}
 	}
 	*/
 
-	 */
 	//Useful functions for formating, packing and unpacking
 	//<=======================>
 
@@ -372,20 +385,40 @@ public class GRPCClientService {
 		String RowTwo = "";
 
 		//Creates a seperate string for the first row of block's first rows and also their second rows - which are sequentially one after the other in the full matrix
-		for (i = 0; i < A.length; i++) {
+		for (int i = 0; i < A.size(); i++) {
 			//Once a row of blocks has been parsed/processed, we can add the strings in rowOne and rowTwo to the final string with a new line inbetween
 			//And repeat the same process on the next row of blocks - this will eventually give us a string that shows the matrix in the right order
-			if (i % ((int) Math.sqrt(A.length)) == 0) {
-				muddledString += "[" + rowOne.substring(0, str.length() - 2) + "]\n[" + RowTwo.substring(0, str.length() - 2) + "]\n";
+			if (i % ((int) Math.sqrt(A.size())) == 0) {
+				muddledString += "[" + rowOne.substring(0, rowOne.length() - 2) + "]\n[" + RowTwo.substring(0, rowOne.length() - 2) + "]\n";
 				rowOne = "";
 				RowTwo = "";
-			}
-			else {
+			} else {
 				rowOne += String.valueOf(A.get(i)[0][0]) + ", " + String.valueOf(A.get(i)[0][1]) + ", ";
 				RowTwo += String.valueOf(A.get(i)[1][0]) + ", " + String.valueOf(A.get(i)[1][1]) + ", ";
 			}
 		}
+		return muddledString;
+	}
 
+	//Converts a 2D int array (int[][]) to a 2D Integer array (Integer[][]) t
+	static Integer[][] IntArrayToIntergerArray(int[][] A) {
+		Integer[][] result = new Integer[A.length][A[0].length];
+		for(int i = 0; i < A.length; i++){
+			for(int j = 0; j < A[0].length; j++){
+				result[i][j] = Integer.valueOf(A[i][j]);
+			}
+		}
+		return result;
+	}
 
+	//Converts a 2D Integer array (Integer[][]) to a 2D int array (int[][])
+	static int[][] IntergerArrayToIntArray(Integer[][] A) {
+		int[][] result = new int[A.length][A[0].length];
+		for(int i = 0; i < A.length; i++){
+			for(int j = 0; j < A[0].length; j++){
+				result[i][j] = A[i][j].intValue();
+			}
+		}
+		return result;
 	}
 }
