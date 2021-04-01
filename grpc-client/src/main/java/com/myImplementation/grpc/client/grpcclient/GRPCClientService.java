@@ -194,6 +194,8 @@ public class GRPCClientService {
 		//Takes arrays of stubs and the blocks in matrix A and B and places them in the above variables
 		public gRPCBlockMultiplication(List<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub> stubs, List<Integer[][]> blks) {
 			this.stubPool = stubs;
+			this.unprocessedBlockA = new int[blks.size()][blks.get(0).length][blks.get(0)[0].length];
+			this.unprocessedBlockB = new int[blks.size()][blks.get(0).length][blks.get(0)[0].length];
 			for (int i = 0; i < blks.size(); i = i + 2) {
 				this.unprocessedBlockA[i / 2] = IntergerArrayToIntArray(blks.get(i));
 				this.unprocessedBlockB[i / 2] = IntergerArrayToIntArray(blks.get(i + 1));
