@@ -10,8 +10,10 @@ import com.myImplementation.grpc.multiplyBlockResponse;
 //matrixMultServiceImpBase generated from proto file
 import com.myImplementation.grpc.MatrixMultServiceGrpc.MatrixMultServiceImplBase;
 
+/*
 import com.myImplementation.grpc.server;
 import com.myImplementation.grpc.MatrixMultService;
+*/
 
 import io.grpc.stub.StreamObserver;
 
