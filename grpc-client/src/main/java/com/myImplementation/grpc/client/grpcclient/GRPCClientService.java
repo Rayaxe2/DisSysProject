@@ -27,7 +27,7 @@ public class GRPCClientService {
 		String[] serverIPs = new String[]{"18.208.144.93", "3.89.220.217", "3.80.26.40", "184.72.110.77", "54.208.143.214", "18.204.206.212", "18.205.29.165", "34.224.94.243"};
 
 		//"localhost" is the IP of the server we want to connect to - 9090 is it's port
-		ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[0], 8081).usePlaintext().build();
+		ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[0], 9090).usePlaintext().build();
 		//create a stub and pass the channel in as a variable
 		MatrixMultServiceGrpc.MatrixMultServiceBlockingStub stub = MatrixMultServiceGrpc.newBlockingStub(channel);
 
@@ -87,19 +87,23 @@ public class GRPCClientService {
 		//So 16 blocks will be needed, 4 for each atomic operation
 		List<List<Integer[][]>> atomicBlockOPQueue = new ArrayList<List<Integer[][]>>();
 
-		//Selects the specific blocks needed to calculate a block of the final matrix
-		for (int i = 0; i < allBlocks[0].length; i++) {
-			List<Integer[][]> newQueue = new ArrayList<>();
-			for (int j = 0; j < dim; j++) {
-				newQueue.add(IntArrayToIntergerArray(allBlocks[1][(j * dim) + (i / dim)]));
-				newQueue.add(IntArrayToIntergerArray(allBlocks[0][j + (dim * (i / dim))]));
-			}
-			atomicBlockOPQueue.add(newQueue);
-		}
-
 		//The dimentions of the array in terms of 2x2 blocks
 		int blockDim =  (int) Math.sqrt(allBlocks[0].length);
 
+		//Selects the specific blocks needed to calculate a block of the final matrix
+		for (int a = 0; a < allBlocks[0].length; a++) {
+			int currentCol = (a % blockDim);
+			int currentRow = 0;
+			if(a % blockDim == 0){
+				currentRow += 1;
+			}
+			List<Integer[][]> newQueue = new ArrayList<>();
+			for (int i = 0; i < blockDim; i++) {
+				newQueue.add(IntArrayToIntergerArray(allBlocks[1][currentCol + (i * blockDim)]));
+				newQueue.add(IntArrayToIntergerArray(allBlocks[0][(currentRow * blockDim) + i]));
+			}
+			atomicBlockOPQueue.add(newQueue);
+		}
 
 		//Stores the time before gRPC functiona call
 		long startTime = System.nanoTime();
@@ -119,6 +123,12 @@ public class GRPCClientService {
 		//Calculates an estimate for the amount of servers needed to meet the deadline given the amount of operations that will be needed
 		//((blockDim * 2) * (blockDim * blockDim)) - every block in the final matrix will have been produced through (blockDim * 2) block multiplications/grpc calls, and there are blockDim * blockDim blocks in the matrix
 		int serversNeeded = (int) Math.ceil((footprint * ((blockDim * 2) * (blockDim * blockDim))) / deadline);
+
+		//Caps the amount of servers that can be used to 8
+		if (serversNeeded > 8) {
+			serversNeeded = 8;
+		}
+
 		//Closes the channel we opened
 		channel.shutdown();
 
@@ -129,7 +139,7 @@ public class GRPCClientService {
 		List<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub> listOfStubs = new ArrayList<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub>();
 		//Creates "serversNeeded" many stubs and stores them in the aforementioned list
 		for (int i = 0; i < serversNeeded; i++) {
-			channel = ManagedChannelBuilder.forAddress(serverIPs[i], 8081).usePlaintext().build();
+			channel = ManagedChannelBuilder.forAddress(serverIPs[i], 9090).usePlaintext().build();
 			listOfStubs.add(MatrixMultServiceGrpc.newBlockingStub(channel));
 		}
 
