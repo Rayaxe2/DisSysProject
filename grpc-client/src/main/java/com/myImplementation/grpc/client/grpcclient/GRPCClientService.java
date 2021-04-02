@@ -280,7 +280,7 @@ public class GRPCClientService {
 		//In an attempt to find a server that is active and accepting connection and messages from the client
 		catch (IllegalArgumentException e){
 			//If the user attempted to connect to every server in the list of IPs and failed, then an error is returned to the rest controlled
-			if(serverIndex < 8) {
+			if(serverIndex < 7) {
 				return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
 			}
 			else {
@@ -288,7 +288,7 @@ public class GRPCClientService {
 			}
 		}
 		catch (io.grpc.StatusRuntimeException e) {
-			if(serverIndex < 8) {
+			if(serverIndex < 7) {
 				return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
 			}
 			else {
@@ -457,7 +457,7 @@ public class GRPCClientService {
 		//In an attempt to find a server that is active and accepting connection and messages from the client
 		catch (IllegalArgumentException e){
 				//If the user attempted to connect to every server in the list of IPs and failed, then an error is returned to the rest controlled
-				if(serverIndex < 8) {
+				if(serverIndex < 7) {
 					return matrixAdditionOperation(mA, mB, dimentions, deadline, serverIndex + 1);
 				}
 				else {
@@ -465,7 +465,7 @@ public class GRPCClientService {
 				}
 			}
 		catch (io.grpc.StatusRuntimeException e) {
-				if(serverIndex < 8) {
+				if(serverIndex < 7) {
 					return matrixAdditionOperation(mA, mB, dimentions, deadline, serverIndex + 1);
 				}
 				else {
