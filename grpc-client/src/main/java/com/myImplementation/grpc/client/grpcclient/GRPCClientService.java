@@ -21,7 +21,7 @@ import com.myImplementation.grpc.MatrixMultServiceGrpc;
 @Service
 public class GRPCClientService {
 	//List of server IPs for stubs to connect to
-	String[] serverIPs = new String[]{"54.89.132.215", "34.224.94.243", "18.208.144.93", "3.89.220.217", "18.204.206.212", "18.205.29.165", "184.72.110.77", "54.208.143.214"};
+	String[] serverIPs = new String[]{"34.203.38.53", "3.94.181.403", "3.83.226.8", "54.208.88.73", "54.174.173.230", "54.236.246.232", "54.166.38.17", "3.91.176.84"};
 
 	//Breaks matricies into 2x2 blocks, and groups the relevant set of blocks that are needed to work out a block of the final matrix
 	//A pool of threads are assigned the task of making multiplication and addition gRPC function calls to certain servers, via a stub,
