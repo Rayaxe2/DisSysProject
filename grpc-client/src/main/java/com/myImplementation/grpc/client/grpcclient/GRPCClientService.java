@@ -33,8 +33,8 @@ public class GRPCClientService {
 
 			//For Debugging
 			System.out.println("State: " + channel.getState(false).toString());
-			System.out.println("State: " + channel.getState(false).isShutdown());
-			System.out.println("State: " + channel.getState(false).isTerminated());
+			System.out.println("State: " + channel.isShutdown());
+			System.out.println("State: " + channel.isTerminated());
 
 			//We create a stub and pass the channel in as a parameter to link it to the server
 			MatrixMultServiceGrpc.MatrixMultServiceBlockingStub stub = MatrixMultServiceGrpc.newBlockingStub(channel);
