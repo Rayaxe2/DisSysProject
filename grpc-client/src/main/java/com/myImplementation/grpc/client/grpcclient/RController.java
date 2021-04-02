@@ -69,7 +69,7 @@ public class RController { //Previously called PingPongEndpoint
 		}
 
 		//Checks of the matrix is square and conforms to the provided dimentions
-		if(matrixAAsString.length() != (noOfRows*noOfRows) || matrixBAsString.length() != (noOfRows*noOfRows)){
+		if((((noOfRows*noOfRows) * 2) + 1) != matrixAAsString.length() || (((noOfRows*noOfRows) * 2) + 1) != matrixBAsString.length()){
 			return "Error: The matrix is either not square or not " + noOfRows + "x" + noOfRows + "- which is should be";
 		}
 
@@ -114,7 +114,7 @@ public class RController { //Previously called PingPongEndpoint
 		}
 
 		//Checks of the matrix is square and conforms to the provided dimentions
-		if(matrixAAsString.length() != (noOfRows*noOfRows) || matrixBAsString.length() != (noOfRows*noOfRows)){
+		if((((noOfRows*noOfRows) * 2) + 1) != matrixAAsString.length() || (((noOfRows*noOfRows) * 2) + 1) != matrixBAsString.length()){
 			return "Error: The matrix is either not square or not " + noOfRows + "x" + noOfRows + "- which is should be";
 		}
 
