@@ -532,7 +532,7 @@ public class GRPCClientService {
 				 */
 				//Accumilates the results of the multiplication into a single block
 				if (i > 0) {
-					addResults = stubMultRequest(stubPool.get(i % stubPool.size()), resultingMatrix, multResults);
+					addResults = stubAddRequest(stubPool.get(i % stubPool.size()), resultingMatrix, multResults);
 					//If we have only finished the first calculation, we just store the result as there is nothing to add to
 					//otherwise else we do addition, assign the result to blockMultiplicationResponse2 and assign the result here
 					resultingMatrix = addResults;
