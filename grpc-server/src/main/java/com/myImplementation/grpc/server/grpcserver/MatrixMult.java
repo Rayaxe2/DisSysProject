@@ -140,6 +140,50 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 		return C;
 	}
 
+	//Extra functions of list packing and uppacking
+	//<========================>
+
+	//Converts 1D array into a list of integers
+	static List<Integer> array2List(int A[]) {
+		List<Integer> listA = new ArrayList<Integer>();
+		for(int i = 0; i<(A.length); i++)
+		{
+			listA.add(A[i]);
+		}
+		return listA;
+	}
+
+	//Converts 2D array into a list of string lists
+	static List<List<String>> listRepack(int A[][]) {
+		List<List<String>> listA = new ArrayList<List<String>>();
+		for(int i = 0; i<(A.length); i++)
+		{
+			List<String> listB = new ArrayList<String>();
+			for(int x = 0; x<(A[i].length); x++)
+			{
+				listB.add(Integer.toString(A[i][x]));
+			}
+			listA.add(listB);
+		}
+		return listA;
+	}
+
+	//Converts List<com.myImplementation.grpc.array> stuctures into 2D arrays
+	static int[][] listUnpack(List<com.myImplementation.grpc.array> A)  {
+		int[][] ArrayA = new int[A.size()][A.get(0).getItemCount()];
+
+		for (int x = 0; x < A.size(); x++)
+		{
+			for (int y = 0; y < A.get(x).getItemCount(); y++)
+			{
+				ArrayA[x][y] = A.get(x).getItem(y);
+			}
+		}
+
+		return ArrayA;
+	}
+
+	/*!!NOT USED!!*/
 	//Useful Auxilary functions - alternative functions for multiplication and addition
 	//<================>
 	//Dynamic Multiplication - takes an array of blocks that repesent a matrix broken down into 2x2 blocks and carries out matrix multiplication
@@ -161,7 +205,7 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 		int[][][] blocksOfAdditionResult = new int[blocksA.length][blocksA[0].length][blocksA[0][0].length];
 
 		for(int i = 0; i < blocksA.length; i++){
-				blocksOfAdditionResult[i] = addBlockAux(blocksA[i], blocksB[i]);
+			blocksOfAdditionResult[i] = addBlockAux(blocksA[i], blocksB[i]);
 		}
 		return blocksOfAdditionResult;
 	}
@@ -289,49 +333,6 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 			System.out.println("");
 		}
 		return res;
-	}
-
-	//Extra functions of list packing and uppacking
-	//<========================>
-
-	//Converts 1D array into a list of integers
-	static List<Integer> array2List(int A[]) {
-		List<Integer> listA = new ArrayList<Integer>();
-		for(int i = 0; i<(A.length); i++)
-		{
-			listA.add(A[i]);
-		}
-		return listA;
-	}
-
-	//Converts 2D array into a list of string lists
-	static List<List<String>> listRepack(int A[][]) {
-		List<List<String>> listA = new ArrayList<List<String>>();
-		for(int i = 0; i<(A.length); i++)
-		{
-			List<String> listB = new ArrayList<String>();
-			for(int x = 0; x<(A[i].length); x++)
-			{
-				listB.add(Integer.toString(A[i][x]));
-			}
-			listA.add(listB);
-		}
-		return listA;
-	}
-
-	//Converts List<com.myImplementation.grpc.array> stuctures into 2D arrays
-	static int[][] listUnpack(List<com.myImplementation.grpc.array> A)  {
-		int[][] ArrayA = new int[A.size()][A.get(0).getItemCount()];
-
-		for (int x = 0; x < A.size(); x++)
-		{
-			for (int y = 0; y < A.get(x).getItemCount(); y++)
-			{
-				ArrayA[x][y] = A.get(x).getItem(y);
-			}
-		}
-
-		return ArrayA;
 	}
 }
 

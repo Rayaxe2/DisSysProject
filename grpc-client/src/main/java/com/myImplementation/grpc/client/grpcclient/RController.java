@@ -33,15 +33,17 @@ public class RController { //Previously called PingPongEndpoint
 		this.grpcClientService = grpcClientService;
 	}
 
+	//Used to call the matrixMultiplicationOperation client service/function
 	@PostMapping("/MultiplyMatracies")
-	public String matrix (@RequestParam(value = "Matrix_A") MultipartFile matrixA, @RequestParam(value = "Matrix_B") MultipartFile matrixB, @RequestParam(value = "noOfRows") int noOfRows, @RequestParam(value = "deadline") int deadline){
+	public String mutliply (@RequestParam(value = "Matrix_A") MultipartFile matrixA, @RequestParam(value = "Matrix_B") MultipartFile matrixB, @RequestParam(value = "noOfRows") int noOfRows, @RequestParam(value = "deadline") int deadline){
+		//checks if input is empty
 		if(matrixA.isEmpty() || matrixB.isEmpty()) {
-			return "One or both of the matracies files provided are/is empty";
+			return "Error: One or both of the matracies files provided are/is empty";
 		}
 
+		//Reads the provided files and stores them in a string which is sent to the client
 		String matrixAAsString = "";
 		String matrixBAsString = "";
-
 		try {
 			BufferedReader matrixAReader = new BufferedReader(new InputStreamReader(matrixA.getInputStream()));
 			BufferedReader matrixBReader = new BufferedReader(new InputStreamReader(matrixB.getInputStream()));
@@ -66,19 +68,27 @@ public class RController { //Previously called PingPongEndpoint
 			e.printStackTrace();
 		}
 
-		//Hands the 2 matrix inputs to the grpc client's "matrixOperations" function so it can process it and provide a response - the number of rows in the matrix is specified so the input can be formatted
+		//Checks of the matrix is square and conforms to the provided dimentions
+		if(matrixAAsString.length() != (noOfRows*noOfRows) || matrixBAsString.length() != (noOfRows*noOfRows)){
+			return "Error: The matrix is either not square or not " + noOfRows + "x" + noOfRows + "- which is should be";
+		}
+
+		//Hands the 2 matrix inputs to the grpc client's "matrixOperations" function so it can process it and provide a response -
+		//The number of rows in the matrix is specified so the input can be formatted
 		return grpcClientService.matrixMultiplicationOperation(matrixAAsString, matrixBAsString, noOfRows, deadline);
 	}
 
+	//Used to call the matrixAdditionOperation client service/function
 	@PostMapping("/AddMatracies")
-	public String matrix (@RequestParam(value = "Matrix_A") MultipartFile matrixA, @RequestParam(value = "Matrix_B") MultipartFile matrixB, @RequestParam(value = "noOfRows") int noOfRows, @RequestParam(value = "deadline") int deadline){
+	public String add (@RequestParam(value = "Matrix_A") MultipartFile matrixA, @RequestParam(value = "Matrix_B") MultipartFile matrixB, @RequestParam(value = "noOfRows") int noOfRows, @RequestParam(value = "deadline") int deadline){
+		//checks if input is empty
 		if(matrixA.isEmpty() || matrixB.isEmpty()) {
-			return "One or both of the matracies files provided are/is empty";
+			return "Error: One or both of the matracies files provided are/is empty";
 		}
 
+		//Reads the provided files and stores them in a string which is sent to the client
 		String matrixAAsString = "";
 		String matrixBAsString = "";
-
 		try {
 			BufferedReader matrixAReader = new BufferedReader(new InputStreamReader(matrixA.getInputStream()));
 			BufferedReader matrixBReader = new BufferedReader(new InputStreamReader(matrixB.getInputStream()));
@@ -103,7 +113,13 @@ public class RController { //Previously called PingPongEndpoint
 			e.printStackTrace();
 		}
 
-		//Hands the 2 matrix inputs to the grpc client's "matrixOperations" function so it can process it and provide a response - the number of rows in the matrix is specified so the input can be formatted
+		//Checks of the matrix is square and conforms to the provided dimentions
+		if(matrixAAsString.length() != (noOfRows*noOfRows) || matrixBAsString.length() != (noOfRows*noOfRows)){
+			return "Error: The matrix is either not square or not " + noOfRows + "x" + noOfRows + "- which is should be";
+		}
+
+		//Hands the 2 matrix inputs to the grpc client's "matrixOperations" function so it can process it and provide a response -
+		//The number of rows in the matrix is specified so the input can be formatted
 		return grpcClientService.matrixAdditionOperation(matrixAAsString, matrixBAsString, noOfRows, deadline);
 	}
 }
