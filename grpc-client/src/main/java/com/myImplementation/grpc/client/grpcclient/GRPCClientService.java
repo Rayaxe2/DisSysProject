@@ -519,7 +519,7 @@ public class GRPCClientService {
 
 			//The results of indiviual addition and multiplcation requests are stored here before being added or assigned to the resulting matrix
 			List<com.myImplementation.grpc.array> addResults;
-			List<com.myImplementation.grpc.array> resultingMatrix;
+			List<com.myImplementation.grpc.array> mutlResults;
 
 			//Goes through each blocks in the operation set (the set of blocks that need to be mutliplied and added)
 			for (int i = 0; i < unprocessedBlockA.length; i++) {
