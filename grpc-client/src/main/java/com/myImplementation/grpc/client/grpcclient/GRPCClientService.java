@@ -697,9 +697,7 @@ public class GRPCClientService {
 			//Once a row of blocks has been parsed/processed, we can add the strings in rowOne and rowTwo to the final string with a new line inbetween
 			//And repeat the same process on the next row of blocks - this will eventually give us a string that shows the matrix in the right order
 			if ((i % ((int) Math.sqrt(A.size()))) == 0 && i != 0) {
-				System.out.println("here 1");
 				muddledString += "[" + rowOne.substring(0, (rowOne.length() - 2)) + "]\n[" + rowTwo.substring(0, (rowTwo.length() - 2)) + "]\n";
-				System.out.println("here 2");
 				rowOne = "";
 				rowTwo = "";
 			}
