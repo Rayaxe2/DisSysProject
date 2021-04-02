@@ -514,47 +514,32 @@ public class GRPCClientService {
 			//Used for debugging
 			System.out.println("\nunprocessedBlockA:\n " + Arrays.deepToString(unprocessedBlockA));
 			*/
-
 			//The result of each block multiplication should be accumilated here
 			List<com.myImplementation.grpc.array> resultingMatrix = new ArrayList<com.myImplementation.grpc.array>();
 
+			//The results of indiviual addition and multiplcation requests are stored here before being added or assigned to the resulting matrix
+			List<com.myImplementation.grpc.array> addResults;
+			List<com.myImplementation.grpc.array> resultingMatrix;
+
 			//Goes through each blocks in the operation set (the set of blocks that need to be mutliplied and added)
 			for (int i = 0; i < unprocessedBlockA.length; i++) {
-				multiplyBlockResponse blockMultiplicationResponse = stubPool.get(i % stubPool.size()).multiplyBlock(
-						multiplyBlockRequest.newBuilder()
-								.clearMatrixA()
-								.clearMatrixB()
-								.addAllMatrixA(TwoDimArrayToTwoDimList(unprocessedBlockB[i]))
-								.addAllMatrixB(TwoDimArrayToTwoDimList(unprocessedBlockA[i]))
-								.build()
-				);
-
+				multResults = stubMultRequest(stubPool.get(stubIndex % stubPool.size()), TwoDimArrayToTwoDimList(unprocessedBlockA), TwoDimArrayToTwoDimList(unprocessedBlockB));
 				/*
 				//Used for debugging
 				System.out.println("\nMultResults (" + i + "):\n " + listUnpackToString(blockMultiplicationResponse.getMatrixCList()));
 				System.out.println("\nunprocessedBlockA[i]:\n " + Arrays.deepToString(unprocessedBlockA[i]));
 				System.out.println("\nunprocessedBlockB[i]:\n " + Arrays.deepToString(unprocessedBlockB[i]));
 				 */
-
 				//Accumilates the results of the multiplication into a single block
 				if (i > 0) {
-					multiplyBlockResponse blockMultiplicationResponse2 = stubPool.get(i % stubPool.size()).addBlock(
-							multiplyBlockRequest.newBuilder()
-									.clearMatrixA()
-									.clearMatrixB()
-									.addAllMatrixA(resultingMatrix)
-									.addAllMatrixB(blockMultiplicationResponse.getMatrixCList())
-									.build()
-					);
-
+					addResults = stubMultRequest(stubPool.get(stubIndex % stubPool.size()), resultingMatrix, multResults);
 					//If we have only finished the first calculation, we just store the result as there is nothing to add to
 					//otherwise else we do addition, assign the result to blockMultiplicationResponse2 and assign the result here
-					resultingMatrix = blockMultiplicationResponse2.getMatrixCList();
+					resultingMatrix = addResults;
 				}
 				else {
-					resultingMatrix = blockMultiplicationResponse.getMatrixCList();
+					resultingMatrix = multResults;
 				}
-
 				/*
 				//Used for debugging
 				System.out.println("\nresultingMatrix:\n " + listUnpackToString(resultingMatrix));
@@ -585,19 +570,37 @@ public class GRPCClientService {
 		//Blocks are added together
 		@Override
 		public List<com.myImplementation.grpc.array> call() {
-			//Calls gRPC function on servers
-			multiplyBlockResponse blockMultiplicationResponse = stubPool.get(stubIndex % stubPool.size()).addBlock(
-					multiplyBlockRequest.newBuilder()
-							.clearMatrixA()
-							.clearMatrixB()
-							.addAllMatrixA(TwoDimArrayToTwoDimList(unprocessedBlockA))
-							.addAllMatrixB(TwoDimArrayToTwoDimList(unprocessedBlockB))
-							.build()
-			);
-
-			//Returns result
-			return blockMultiplicationResponse.getMatrixCList();
+			//Calls gRPC addition function on servers
+			return stubAddRequest(stubPool.get(stubIndex % stubPool.size()), TwoDimArrayToTwoDimList(unprocessedBlockA), TwoDimArrayToTwoDimList(unprocessedBlockB));
 		}
+	}
+
+	//Invokes the gRPC function that carries out matrix multiplication via the provided stub with the supplied matrix inputs
+	//And returns the the resulting matrix
+	static List<com.myImplementation.grpc.array> stubMultRequest (MatrixMultServiceGrpc.MatrixMultServiceBlockingStub stub, List<com.myImplementation.grpc.array> mA, List<com.myImplementation.grpc.array> mB) {
+		multiplyBlockResponse reply = stub.multiplyBlock(
+				multiplyBlockRequest.newBuilder()
+						.clearMatrixA()
+						.clearMatrixB()
+						.addAllMatrixA(TwoDimArrayToTwoDimList(mA)
+						.addAllMatrixB(TwoDimArrayToTwoDimList(mB)
+						.build()
+		);
+		return reply.getMatrixCList();
+	}
+
+	//Invokes the gRPC function that carries out matrix addition via the provided stub with the supplied matrix inputs
+	//And returns the the resulting matrix
+	static List<com.myImplementation.grpc.array> stubAddRequest (MatrixMultServiceGrpc.MatrixMultServiceBlockingStub stub, List<com.myImplementation.grpc.array> mA, List<com.myImplementation.grpc.array> mB) {
+		multiplyBlockResponse reply = stub.addBlock(
+				multiplyBlockRequest.newBuilder()
+						.clearMatrixA()
+						.clearMatrixB()
+						.addAllMatrixA(mA)
+						.addAllMatrixB(mB)
+						.build()
+		);
+		return reply.getMatrixCList();
 	}
 
 	//Useful functions for formating, packing and unpacking
