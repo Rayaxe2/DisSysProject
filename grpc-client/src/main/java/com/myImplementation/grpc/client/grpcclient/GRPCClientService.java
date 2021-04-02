@@ -571,7 +571,7 @@ public class GRPCClientService {
 		@Override
 		public List<com.myImplementation.grpc.array> call() {
 			//Calls gRPC addition function on servers
-			return stubAddRequest(stubPool.get(stubIndex % stubPool.size()), TwoDimArrayToTwoDimList(unprocessedBlockA[i]), TwoDimArrayToTwoDimList(unprocessedBlockB[i]));
+			return stubAddRequest(stubPool.get(stubIndex % stubPool.size()), TwoDimArrayToTwoDimList(unprocessedBlockA), TwoDimArrayToTwoDimList(unprocessedBlockB));
 		}
 	}
 
