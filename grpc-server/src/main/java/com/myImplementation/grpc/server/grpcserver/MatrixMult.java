@@ -200,9 +200,9 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 	}
 
 	//multiplyMatrixBlockAux - provided in lab 1
-	static int[][] multiplyMatrixBlockAux( int A[][], int B[][]) {
+	static int[][] multiplyMatrixBlockAux(int A[][], int B[][]) {
 		int MAX = 4;
-		int bSize=2;
+		int bSize = 2;
 		int[][] A1 = new int[MAX][MAX];
 		int[][] A2 = new int[MAX][MAX];
 		int[][] A3 = new int[MAX][MAX];
