@@ -52,7 +52,7 @@ public class GRPCClientService {
 
 			//Also checks that the matracies' dimentions are a mutliple of 2 since we want n^2 matracies only - so we can break them down
 			//Into a series of 2x2 blocks - which you can do with al even n x n matracies that are square
-			else if(!(dim % 2 == 0)){
+			else if (!(dim % 2 == 0)) {
 				channel.shutdown();
 				return "Error: The Matracies must be n^2 large - where n is an even number";
 			}
@@ -115,7 +115,7 @@ public class GRPCClientService {
 			List<List<Integer[][]>> atomicBlockOPQueue = new ArrayList<List<Integer[][]>>();
 
 			//The dimentions of the array in terms of 2x2 blocks is determined by the number of blocks sqaured and stored
-			int blockDim =  (int) Math.sqrt(allBlocks[0].length);
+			int blockDim = (int) Math.sqrt(allBlocks[0].length);
 
 			//This will contain pairs of specific blocks from matrix A and specific blocks from matix B which need to be multiplied by eachother
 			//If we want the result of multiplying the 2nd block of 3 block by 3 block structure (first row 2nd column in the block matrix)
@@ -140,7 +140,7 @@ public class GRPCClientService {
 			//Selects the specific pair of blocks needed to calculate a block of the final matrix
 			for (int a = 0; a < allBlocks[0].length; a++) {
 				currentCol = (a % blockDim);
-				if(a % blockDim == 0 && a != 0){
+				if (a % blockDim == 0 && a != 0) {
 					currentRow += 1;
 				}
 				newQueue = new ArrayList<>();
@@ -210,7 +210,6 @@ public class GRPCClientService {
 			//Closes the channel we opened for testing
 			channel.shutdown();
 
-
 			//These theards will be used to send gRPC service requests concurrently
 			//(eliminating the need to wait for a response before sending another request)
 			ExecutorService serverThreadPool = Executors.newFixedThreadPool(serversNeeded);
@@ -263,11 +262,9 @@ public class GRPCClientService {
 					listOfResults.add(
 							IntArrayToIntergerArray(listUnpack(futureResults.get(i).get()))
 					);
-				}
-				catch (ExecutionException e){
+				} catch (ExecutionException e) {
 					e.printStackTrace();
-				}
-				catch (InterruptedException e){
+				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
@@ -278,167 +275,167 @@ public class GRPCClientService {
 			//Makes the funciton return the result of the operation/service to the rest controller - which calls it
 			return listOfBlocksToString(listOfResults); //listOfBlocksToString converts the lists of blocks into a formatted string
 		}
-
-		//Similar to matrixMultiplication, however it simply Splits the 2 matracies into blocks and makes a pool of threads
-		//Which are used add each coresponding blocks to eachother to form a final block matrix which is then formated into a string
-		public String matrixAdditionOperation(String mA, String mB, int dimentions, int deadline) {
-			//The IP in serverIPs[0] is the IP of the server we want to connect to - 9090 is it's port
-			ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[0], 9090).usePlaintext().build();
-			//We create a stub and pass the channel in as a parameter to link it to the server
-			MatrixMultServiceGrpc.MatrixMultServiceBlockingStub stub = MatrixMultServiceGrpc.newBlockingStub(channel);
-
-			//The rest controller gives a string of numbers seperated by commas, we put them in a 1d string array first
-			String[] a1D = mA.split(",");
-			String[] b1D = mB.split(",");
-
-			//Stores the provided dimentions of the matrix - the number of rows will always be the same as the number of columns
-			int dim = dimentions;
-
-			//Makes the sure matrix is square - if it is not, an error message will be returned to the rest controller
-			if (!(a1D.length == (dim * dim) && b1D.length == (dim * dim))) {
-				channel.shutdown();
-				return "Error: Make sure both matracies have the dimentions " + Integer.toString(dim) + "x" + Integer.toString(dim);
-			}
-
-			//Also checks that the matracies' dimentions are a mutliple of 2 since we want n^2 matracies only - so we can break them down
-			//Into a series of 2x2 blocks - which you can do with al even n x n matracies that are square
-			else if(!(dim % 2 == 0)){
-				channel.shutdown();
-				return "Error: The Matracies must be n^2 large - where n is an even number";
-			}
-
-			//We then converts the string arraysm a1D and b1D, to 1d int arrays
-			int[] a1DInt = new int[a1D.length];
-			int[] b1DInt = new int[b1D.length];
-			try {
-				for (int i = 0; i < a1DInt.length; i++) {
-					a1DInt[i] = Integer.parseInt(a1D[i]);
-					b1DInt[i] = Integer.parseInt(b1D[i]);
-				}
-			}
-			//Throws error and returns error message if the provided rest controller matrix inputs are nin the incorrect format
-			catch (final NumberFormatException e) {
-				return "Error: Make sure that the matrix is composed of only numbers, commas and new lines and is in the correct format";
-			}
-
-
-			//We them split the 1d int array into a 2d array of size dim x dim (dim being the provided dimentions)
-			//Which makes it easier to group the matrix into blocks
-			int[][] a2D = new int[dim][dim];
-			int[][] b2D = new int[dim][dim];
-			for (int i = 0; i < dim; i++) {
-				for (int j = 0; j < dim; j++) {
-					a2D[i][j] = Integer.parseInt(a1D[(i * dim) + j]);
-					b2D[i][j] = Integer.parseInt(b1D[(i * dim) + j]);
-				}
-			}
-
-			//Splits the 2 input matricies into a series of 2x2 blocks and stores them in a 4D array
-			//The 4th dimention stores an array/the set of blocks in MatrixA and an array/the set of block in MatrixB
-			//The 3rd dimention stores the Array of blocks for each Matrix
-			//The 2nd and 1st dimention store the blocks (2x2 arrays)
-			int[][][][] allBlocks = matrixToBlockList(a1DInt, b1DInt);
-
-			/*
-			///for debugging
-			System.out.println("\na1D: " + Arrays.toString(a1D));
-			System.out.println("\nb1D: " + Arrays.toString(b1D));
-			System.out.println("\na2D: " + Arrays.deepToString(a2D));
-			System.out.println("\na2D: " + Arrays.deepToString(b2D));
-			System.out.println("\na1D: " + Arrays.toString(a1D));
-			System.out.println("\nb1D: " + Arrays.toString(b1D));
-			 */
-
-			//The dimentions of the array in terms of 2x2 blocks is determined by the number of blocks sqaured and stored
-			int blockDim =  (int) Math.sqrt(allBlocks[0].length);
-
-			//Stores the time before gRPC functiona call
-			long startTime = System.nanoTime();
-			//gets a response by calling the addBlockRequest from the stub with an arbirtrary block input from the queue
-			//The result is discarded
-			multiplyBlockResponse reply = stub.addBlock(
-					multiplyBlockRequest.newBuilder()
-							.clearMatrixA()
-							.clearMatrixB()
-							.addAllMatrixA(TwoDimArrayToTwoDimList(allBlocks[0][0]))
-							.addAllMatrixB(TwoDimArrayToTwoDimList(allBlocks[0][0]))
-							.build()
-			);
-			//Stores the time after gRPC functiona call
-			long endTime = System.nanoTime();
-			//Stores the difference between the start and end time
-			long footprint = (endTime - startTime);
-			//Calculates an estimate for the amount of servers needed to meet the deadline given the amount of operations that will be needed
-			//blockDim * blockDim addictions will be executed to get the result
-			int serversNeeded = (int) Math.ceil(((double) footprint * ((double) blockDim * (double) blockDim)) / (double) ((double) deadline * 1000000000.0)); //1 second = 1 million nano second - deadline is in seconds
-
-			//Caps the amount of servers that can be allocated to 8
-			if (serversNeeded > 8) {
-				serversNeeded = 8;
-			}
-			//At least 1 server must be available - so 1 is assigned at the very least
-			else if (serversNeeded == 0) {
-				serversNeeded = 1;
-			}
-
-			//Closes the channel we opened
-			channel.shutdown();
-
-			//These theards will be used to send gRPC service requests concurrently (eliminating the need to wait for a response before sending another request)
-			ExecutorService serverThreadPool = Executors.newFixedThreadPool(serversNeeded);
-			//Stores list/pool of stubs for the threads to use
-			List<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub> listOfStubs = new ArrayList<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub>();
-			//Creates "serversNeeded" many stubs and stores them in the aforementioned list
-			for (int i = 0; i < serversNeeded; i++) {
-				listOfStubs.add(MatrixMultServiceGrpc.newBlockingStub(ManagedChannelBuilder.forAddress(serverIPs[i], 9090).usePlaintext().build()));
-			}
-
-			//This will store the results of each thread
-			List<Future<List<com.myImplementation.grpc.array>>> futureResults = new ArrayList<Future<List<com.myImplementation.grpc.array>>>();
-
-			//For each block in both matracies, we make our threadpool add the corresponding blocks in the matracies
-			for (int i = 0; i < allBlocks[0].length; i++) {
-				//The pool of stubs and the blocks that we want to add are sent to be used for the addition operations,
-				//which the thread pool executes. The results are collected and stored in the list of future, "futureResults"
-				futureResults.add(
-						serverThreadPool.submit(
-								new gRPCBlockAddition(listOfStubs, allBlocks[0][i], allBlocks[1][i], i)
-						)
-				);
-			}
-
-			//Used to format the results (which are recieved as features that contain List<com.myImplementation.grpc.array>) back to a series of 2x2 blocks
-			List<Integer[][]> listOfResults = new ArrayList<Integer[][]>();
-
-			//Places the resulting matrix blocks into a list of blocks
-			for (int i = 0; i < futureResults.size(); i++) {
-				try {
-					listOfResults.add(
-							IntArrayToIntergerArray(listUnpack(futureResults.get(i).get()))
-					);
-					/*
-					//for debugging
-					System.out.println("\nlistOfResults:\n " + Arrays.deepToString(listOfResults.get(i)));
-					 */
-				}
-				catch (ExecutionException e){
-					e.printStackTrace();
-				}
-				catch (InterruptedException e){
-					e.printStackTrace();
-				}
-			}
-
-			//Shuts down the server once it's done processing the remaining threads
-			serverThreadPool.shutdownNow();
-
-			//Makes the funciton return the result of the operation/service to the rest controller - which calls it
-			return listOfBlocksToString(listOfResults); //listOfBlocksToString converts the lits of blocks into a formatted string
-		}
 		catch (IllegalArgumentException e){
 			System.out.println("!!!!!!");
 			return "Error!";
 		}
+	}
+
+	//Similar to matrixMultiplication, however it simply Splits the 2 matracies into blocks and makes a pool of threads
+	//Which are used add each coresponding blocks to eachother to form a final block matrix which is then formated into a string
+	public String matrixAdditionOperation(String mA, String mB, int dimentions, int deadline) {
+		//The IP in serverIPs[0] is the IP of the server we want to connect to - 9090 is it's port
+		ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[0], 9090).usePlaintext().build();
+		//We create a stub and pass the channel in as a parameter to link it to the server
+		MatrixMultServiceGrpc.MatrixMultServiceBlockingStub stub = MatrixMultServiceGrpc.newBlockingStub(channel);
+
+		//The rest controller gives a string of numbers seperated by commas, we put them in a 1d string array first
+		String[] a1D = mA.split(",");
+		String[] b1D = mB.split(",");
+
+		//Stores the provided dimentions of the matrix - the number of rows will always be the same as the number of columns
+		int dim = dimentions;
+
+		//Makes the sure matrix is square - if it is not, an error message will be returned to the rest controller
+		if (!(a1D.length == (dim * dim) && b1D.length == (dim * dim))) {
+			channel.shutdown();
+			return "Error: Make sure both matracies have the dimentions " + Integer.toString(dim) + "x" + Integer.toString(dim);
+		}
+
+		//Also checks that the matracies' dimentions are a mutliple of 2 since we want n^2 matracies only - so we can break them down
+		//Into a series of 2x2 blocks - which you can do with al even n x n matracies that are square
+		else if(!(dim % 2 == 0)){
+			channel.shutdown();
+			return "Error: The Matracies must be n^2 large - where n is an even number";
+		}
+
+		//We then converts the string arraysm a1D and b1D, to 1d int arrays
+		int[] a1DInt = new int[a1D.length];
+		int[] b1DInt = new int[b1D.length];
+		try {
+			for (int i = 0; i < a1DInt.length; i++) {
+				a1DInt[i] = Integer.parseInt(a1D[i]);
+				b1DInt[i] = Integer.parseInt(b1D[i]);
+			}
+		}
+		//Throws error and returns error message if the provided rest controller matrix inputs are nin the incorrect format
+		catch (final NumberFormatException e) {
+			return "Error: Make sure that the matrix is composed of only numbers, commas and new lines and is in the correct format";
+		}
+
+
+		//We them split the 1d int array into a 2d array of size dim x dim (dim being the provided dimentions)
+		//Which makes it easier to group the matrix into blocks
+		int[][] a2D = new int[dim][dim];
+		int[][] b2D = new int[dim][dim];
+		for (int i = 0; i < dim; i++) {
+			for (int j = 0; j < dim; j++) {
+				a2D[i][j] = Integer.parseInt(a1D[(i * dim) + j]);
+				b2D[i][j] = Integer.parseInt(b1D[(i * dim) + j]);
+			}
+		}
+
+		//Splits the 2 input matricies into a series of 2x2 blocks and stores them in a 4D array
+		//The 4th dimention stores an array/the set of blocks in MatrixA and an array/the set of block in MatrixB
+		//The 3rd dimention stores the Array of blocks for each Matrix
+		//The 2nd and 1st dimention store the blocks (2x2 arrays)
+		int[][][][] allBlocks = matrixToBlockList(a1DInt, b1DInt);
+
+		/*
+		///for debugging
+		System.out.println("\na1D: " + Arrays.toString(a1D));
+		System.out.println("\nb1D: " + Arrays.toString(b1D));
+		System.out.println("\na2D: " + Arrays.deepToString(a2D));
+		System.out.println("\na2D: " + Arrays.deepToString(b2D));
+		System.out.println("\na1D: " + Arrays.toString(a1D));
+		System.out.println("\nb1D: " + Arrays.toString(b1D));
+		 */
+
+		//The dimentions of the array in terms of 2x2 blocks is determined by the number of blocks sqaured and stored
+		int blockDim =  (int) Math.sqrt(allBlocks[0].length);
+
+		//Stores the time before gRPC functiona call
+		long startTime = System.nanoTime();
+		//gets a response by calling the addBlockRequest from the stub with an arbirtrary block input from the queue
+		//The result is discarded
+		multiplyBlockResponse reply = stub.addBlock(
+				multiplyBlockRequest.newBuilder()
+						.clearMatrixA()
+						.clearMatrixB()
+						.addAllMatrixA(TwoDimArrayToTwoDimList(allBlocks[0][0]))
+						.addAllMatrixB(TwoDimArrayToTwoDimList(allBlocks[0][0]))
+						.build()
+		);
+		//Stores the time after gRPC functiona call
+		long endTime = System.nanoTime();
+		//Stores the difference between the start and end time
+		long footprint = (endTime - startTime);
+		//Calculates an estimate for the amount of servers needed to meet the deadline given the amount of operations that will be needed
+		//blockDim * blockDim addictions will be executed to get the result
+		int serversNeeded = (int) Math.ceil(((double) footprint * ((double) blockDim * (double) blockDim)) / (double) ((double) deadline * 1000000000.0)); //1 second = 1 million nano second - deadline is in seconds
+
+		//Caps the amount of servers that can be allocated to 8
+		if (serversNeeded > 8) {
+			serversNeeded = 8;
+		}
+		//At least 1 server must be available - so 1 is assigned at the very least
+		else if (serversNeeded == 0) {
+			serversNeeded = 1;
+		}
+
+		//Closes the channel we opened
+		channel.shutdown();
+
+		//These theards will be used to send gRPC service requests concurrently (eliminating the need to wait for a response before sending another request)
+		ExecutorService serverThreadPool = Executors.newFixedThreadPool(serversNeeded);
+		//Stores list/pool of stubs for the threads to use
+		List<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub> listOfStubs = new ArrayList<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub>();
+		//Creates "serversNeeded" many stubs and stores them in the aforementioned list
+		for (int i = 0; i < serversNeeded; i++) {
+			listOfStubs.add(MatrixMultServiceGrpc.newBlockingStub(ManagedChannelBuilder.forAddress(serverIPs[i], 9090).usePlaintext().build()));
+		}
+
+		//This will store the results of each thread
+		List<Future<List<com.myImplementation.grpc.array>>> futureResults = new ArrayList<Future<List<com.myImplementation.grpc.array>>>();
+
+		//For each block in both matracies, we make our threadpool add the corresponding blocks in the matracies
+		for (int i = 0; i < allBlocks[0].length; i++) {
+			//The pool of stubs and the blocks that we want to add are sent to be used for the addition operations,
+			//which the thread pool executes. The results are collected and stored in the list of future, "futureResults"
+			futureResults.add(
+					serverThreadPool.submit(
+							new gRPCBlockAddition(listOfStubs, allBlocks[0][i], allBlocks[1][i], i)
+					)
+			);
+		}
+
+		//Used to format the results (which are recieved as features that contain List<com.myImplementation.grpc.array>) back to a series of 2x2 blocks
+		List<Integer[][]> listOfResults = new ArrayList<Integer[][]>();
+
+		//Places the resulting matrix blocks into a list of blocks
+		for (int i = 0; i < futureResults.size(); i++) {
+			try {
+				listOfResults.add(
+						IntArrayToIntergerArray(listUnpack(futureResults.get(i).get()))
+				);
+				/*
+				//for debugging
+				System.out.println("\nlistOfResults:\n " + Arrays.deepToString(listOfResults.get(i)));
+				 */
+			}
+			catch (ExecutionException e){
+				e.printStackTrace();
+			}
+			catch (InterruptedException e){
+				e.printStackTrace();
+			}
+		}
+
+		//Shuts down the server once it's done processing the remaining threads
+		serverThreadPool.shutdownNow();
+
+		//Makes the funciton return the result of the operation/service to the rest controller - which calls it
+		return listOfBlocksToString(listOfResults); //listOfBlocksToString converts the lits of blocks into a formatted string
 	}
 
 	//Callable implementation
