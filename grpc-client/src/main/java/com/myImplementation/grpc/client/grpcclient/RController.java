@@ -40,7 +40,6 @@ public class RController { //Previously called PingPongEndpoint
 		if(matrixA.isEmpty() || matrixB.isEmpty()) {
 			return "Error: One or both of the matracies files provided are/is empty";
 		}
-
 		//Reads the provided files and stores them in a string which is sent to the client
 		String matrixAAsString = "";
 		String matrixBAsString = "";
