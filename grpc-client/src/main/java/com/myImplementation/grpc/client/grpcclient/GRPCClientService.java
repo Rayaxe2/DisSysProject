@@ -32,7 +32,7 @@ public class GRPCClientService {
 			ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[serverIndex], 9090).usePlaintext().build();
 
 			//For Debugging
-			System.out.println(serverIndex)
+			System.out.println(serverIndex);
 			System.out.println("State: " + channel.isShutdown());
 			System.out.println("State: " + channel.isTerminated());
 			System.out.println("State: " + channel.getState(false).toString());
