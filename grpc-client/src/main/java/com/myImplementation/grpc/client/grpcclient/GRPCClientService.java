@@ -21,7 +21,7 @@ import com.myImplementation.grpc.MatrixMultServiceGrpc;
 @Service
 public class GRPCClientService {
 	//List of server IPs for stubs to connect to
-	String[] serverIPs = new String[]{"34.203.38.53", "3.94.181.403", "3.83.226.8", "54.208.88.73", "54.174.173.230", "54.236.246.232", "54.166.38.17", "3.91.176.84"};
+	String[] serverIPs = new String[]{"34.203.38.53", "54.157.147.19", "3.83.226.8", "54.208.88.73", "54.174.173.230", "54.236.246.232", "54.166.38.17", "3.91.176.84"};
 
 	//Breaks matricies into 2x2 blocks, and groups the relevant set of blocks that are needed to work out a block of the final matrix
 	//A pool of threads are assigned the task of making multiplication and addition gRPC function calls to certain servers, via a stub,
@@ -282,6 +282,7 @@ public class GRPCClientService {
 		//The the function is called again, but this time it references the next server on the list of server IPs
 		//In an attempt to find a server that is active and accepting connection and messages from the client
 		catch (IllegalArgumentException e){
+			System.out.println("Err1");
 			//If the user attempted to connect to every server in the list of IPs and failed, then an error is returned to the rest controlled
 			if(serverIndex < 7) {
 				return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
@@ -291,6 +292,7 @@ public class GRPCClientService {
 			}
 		}
 		catch (io.grpc.StatusRuntimeException e) {
+			System.out.println("Err2");
 			if(serverIndex < 7) {
 				return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
 			}
