@@ -299,7 +299,7 @@ public class GRPCClientService {
 
 	//Similar to matrixMultiplication, however it simply Splits the 2 matracies into blocks and makes a pool of threads
 	//Which are used add each coresponding blocks to eachother to form a final block matrix which is then formated into a string
-	public String matrixAdditionOperation(String mA, String mB, int dimentions, int deadline) {
+	public String matrixAdditionOperation(String mA, String mB, int dimentions, int deadline, int serverIndex) {
 		try {
 			//The IP in serverIPs[0] is the IP of the server we want to connect to - 9090 is it's port
 			ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[0], 9090).usePlaintext().build();
@@ -458,7 +458,7 @@ public class GRPCClientService {
 		catch (IllegalArgumentException e){
 				//If the user attempted to connect to every server in the list of IPs and failed, then an error is returned to the rest controlled
 				if(serverIndex < 7) {
-					return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
+					return matrixAdditionOperation(mA, mB, dimentions, deadline, serverIndex + 1);
 				}
 				else {
 					return "Error: Possible cause - all servers are either inactive or unresponsive!";
@@ -466,7 +466,7 @@ public class GRPCClientService {
 			}
 		catch (io.grpc.StatusRuntimeException e) {
 				if(serverIndex < 7) {
-					return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
+					return matrixAdditionOperation()Operation(mA, mB, dimentions, deadline, serverIndex + 1);
 				}
 				else {
 					return "Error: Possible cause - all servers are either inactive or unresponsive!";
