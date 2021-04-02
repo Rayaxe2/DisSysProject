@@ -37,6 +37,8 @@ public class GRPCClientService {
 			System.out.println("State: " + channel.isTerminated());
 			System.out.println("State: " + channel.getState(false).toString());
 
+			return "";
+
 			//We create a stub and pass the channel in as a parameter to link it to the server
 			MatrixMultServiceGrpc.MatrixMultServiceBlockingStub stub = MatrixMultServiceGrpc.newBlockingStub(channel);
 
