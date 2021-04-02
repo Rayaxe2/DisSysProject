@@ -29,10 +29,10 @@ public class GRPCClientService {
 	public String matrixMultiplicationOperation(String mA, String mB, int dimentions, int deadline) {
 
 		ManagedChannel channel;
-		
+
 		//The IP in serverIPs[0] is the IP of the server we are gong to connect to - 9090 is it's port
 		try {
-			ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[1], 9090).usePlaintext().build();
+			channel = ManagedChannelBuilder.forAddress(serverIPs[1], 9090).usePlaintext().build();
 		}
 		catch(IllegalArgumentException e){
 			System.out.println("!!!!!!");
