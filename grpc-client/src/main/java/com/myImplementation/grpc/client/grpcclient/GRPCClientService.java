@@ -28,7 +28,7 @@ public class GRPCClientService {
 	//With the groups of blocks - each thread works out a block of the final matrix. The result is unpacks and formated as a string
 	public String matrixMultiplicationOperation(String mA, String mB, int dimentions, int deadline) {
 
-		ManagedChannel channel;
+		ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[0], 9090).usePlaintext().build();
 
 		//The IP in serverIPs[0] is the IP of the server we are gong to connect to - 9090 is it's port
 		try {
