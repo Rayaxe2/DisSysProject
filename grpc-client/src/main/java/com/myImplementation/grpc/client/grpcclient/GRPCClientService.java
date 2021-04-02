@@ -27,15 +27,13 @@ public class GRPCClientService {
 	//A pool of threads are assigned the task of making multiplication and addition gRPC function calls to certain servers, via a stub,
 	//With the groups of blocks - each thread works out a block of the final matrix. The result is unpacks and formated as a string
 	public String matrixMultiplicationOperation(String mA, String mB, int dimentions, int deadline) {
-
-		ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[0], 9090).usePlaintext().build();
-
 		//The IP in serverIPs[0] is the IP of the server we are gong to connect to - 9090 is it's port
 		try {
-			channel = ManagedChannelBuilder.forAddress(serverIPs[1], 9090).usePlaintext().build();
+			ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[1], 9090).usePlaintext().build();
 		}
-		catch(IllegalArgumentException e){
+		catch (IllegalArgumentException e){
 			System.out.println("!!!!!!");
+			return "Error!";
 		}
 
 		//For Debugging
