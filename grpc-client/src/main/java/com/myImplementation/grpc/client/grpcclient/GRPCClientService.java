@@ -32,7 +32,7 @@ public class GRPCClientService {
 		ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[0], 9090).usePlaintext().build();
 
 		//For Debugging
-		System.out.println(String.toString(channel.getState(true)));
+		System.out.println(channel.getState(true));
 
 		//We create a stub and pass the channel in as a parameter to link it to the server
 		MatrixMultServiceGrpc.MatrixMultServiceBlockingStub stub = MatrixMultServiceGrpc.newBlockingStub(channel);
