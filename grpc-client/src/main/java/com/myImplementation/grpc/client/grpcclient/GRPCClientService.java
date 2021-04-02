@@ -277,11 +277,21 @@ public class GRPCClientService {
 		}
 		catch (IllegalArgumentException e){
 			System.out.println("!!!!!! " + serverIndex);
-			return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
+			if(serverIndex < 7) {
+				return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
+			}
+			else {
+				return "Error: Possible cause - all servers are either inactive or unresponsive!";
+			}
 		}
 		catch (io.grpc.StatusRuntimeException e) {
 			System.out.println("!!!!!! " + serverIndex);
-			return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
+			if(serverIndex < 7) {
+				return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
+			}
+			else {
+				return "Error: Possible cause - all servers are either inactive or unresponsive!";
+			}
 		}
 	}
 
