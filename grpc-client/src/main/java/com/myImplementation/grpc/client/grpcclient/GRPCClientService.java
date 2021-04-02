@@ -279,7 +279,7 @@ public class GRPCClientService {
 			System.out.println("!!!!!! " + serverIndex);
 			return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
 		}
-		catch (io.grpc.netty.shaded.io.netty.channel.unix.Errors$NativeConnectException e) {
+		catch (io.grpc.netty.shaded.io.netty.channel.unix.Errors.NativeConnectException e) {
 			System.out.println("!!!!!! " + serverIndex);
 			return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
 		}
