@@ -283,7 +283,6 @@ public class GRPCClientService {
 		catch (IllegalArgumentException e){
 			//If the user attempted to connect to every server in the list of IPs and failed, then an error is returned to the rest controlled
 			if(serverIndex < 7) {
-				channel.shutdown();
 				return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
 			}
 			else {
@@ -292,7 +291,6 @@ public class GRPCClientService {
 		}
 		catch (io.grpc.StatusRuntimeException e) {
 			if(serverIndex < 7) {
-				channel.shutdown();
 				return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
 			}
 			else {
