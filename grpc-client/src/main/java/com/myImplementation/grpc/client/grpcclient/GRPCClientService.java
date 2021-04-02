@@ -466,7 +466,7 @@ public class GRPCClientService {
 			}
 		catch (io.grpc.StatusRuntimeException e) {
 				if(serverIndex < 7) {
-					return matrixAdditionOperation()Operation(mA, mB, dimentions, deadline, serverIndex + 1);
+					return matrixAdditionOperation(mA, mB, dimentions, deadline, serverIndex + 1);
 				}
 				else {
 					return "Error: Possible cause - all servers are either inactive or unresponsive!";
