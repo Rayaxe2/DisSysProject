@@ -26,10 +26,10 @@ public class GRPCClientService {
 	//Breaks matricies into 2x2 blocks, and groups the relevant set of blocks that are needed to work out a block of the final matrix
 	//A pool of threads are assigned the task of making multiplication and addition gRPC function calls to certain servers, via a stub,
 	//With the groups of blocks - each thread works out a block of the final matrix. The result is unpacks and formated as a string
-	public String matrixMultiplicationOperation(String mA, String mB, int dimentions, int deadline) {
+	public String matrixMultiplicationOperation(String mA, String mB, int dimentions, int deadline, int serverIndex) {
 		try {
 			//The IP in serverIPs[0] is the IP of the server we are gong to connect to - 9090 is it's port
-			ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[1], 9090).usePlaintext().build();
+			ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[serverIndex], 9090).usePlaintext().build();
 
 			//For Debugging
 			//System.out.println(channel.getState(false).toString());
@@ -276,8 +276,8 @@ public class GRPCClientService {
 			return listOfBlocksToString(listOfResults); //listOfBlocksToString converts the lists of blocks into a formatted string
 		}
 		catch (IllegalArgumentException e){
-			System.out.println("!!!!!!");
-			return "Error!";
+			System.out.println("!!!!!! " + serverIndex);
+			return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
 		}
 	}
 

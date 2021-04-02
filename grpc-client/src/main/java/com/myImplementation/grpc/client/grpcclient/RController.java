@@ -120,6 +120,6 @@ public class RController { //Previously called PingPongEndpoint
 
 		//Hands the 2 matrix inputs to the grpc client's "matrixOperations" function so it can process it and provide a response -
 		//The number of rows in the matrix is specified so the input can be formatted
-		return grpcClientService.matrixAdditionOperation(matrixAAsString, matrixBAsString, noOfRows, deadline);
+		return grpcClientService.matrixAdditionOperation(matrixAAsString, matrixBAsString, noOfRows, deadline, 0);
 	}
 }
