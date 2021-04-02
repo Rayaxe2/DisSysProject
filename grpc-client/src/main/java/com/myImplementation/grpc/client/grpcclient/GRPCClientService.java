@@ -582,8 +582,8 @@ public class GRPCClientService {
 				multiplyBlockRequest.newBuilder()
 						.clearMatrixA()
 						.clearMatrixB()
-						.addAllMatrixA(TwoDimArrayToTwoDimList(mA)
-						.addAllMatrixB(TwoDimArrayToTwoDimList(mB)
+						.addAllMatrixA(mA)
+						.addAllMatrixB(mB)
 						.build()
 		);
 		return reply.getMatrixCList();
