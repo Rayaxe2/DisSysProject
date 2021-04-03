@@ -7,9 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.lang.Math;
 import java.util.concurrent.Callable;
 import java.util.concurrent.*;
-import java.lang.Math;
 
 //Request and response message from proto
 import com.myImplementation.grpc.multiplyBlockRequest;
