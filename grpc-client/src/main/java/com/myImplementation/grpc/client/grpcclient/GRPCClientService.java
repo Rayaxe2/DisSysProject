@@ -201,7 +201,7 @@ public class GRPCClientService {
 		int serversNeeded = (int) Math.ceil(((double) footprint * (((double) blockDim * 2.0) * ((double) blockDim * (double) blockDim))) / (double) ((double) deadline * 1000000000.0)); //1 second = 1 million nano second - deadline is in seconds
 
 		//Prints estimates on client
-		System.out.println("\n<================>\nEstimated time to needed to complete for a single server: " + String.valueOf((int) ((footprint * ((blockDim * 2) * (blockDim * blockDim))) / 1000000000)) + " Seconds \nNumber of blocks to multiply: " + String.valueOf((blockDim * 2) * (blockDim * blockDim)) + "\nServers Needed to meet deadline: " + serversNeeded);
+		System.out.println("\n<======Mult======>\n[Estimated time (One Server)]: " + String.valueOf((int) ((footprint * ((blockDim * 2) * (blockDim * blockDim))) / 1000000000)) + " Seconds \n[Number of blocks to multiply]: " + String.valueOf((blockDim * 2) * (blockDim * blockDim)) + "\n[Servers Needed to meet deadline]: " + serversNeeded + "\n");
 
 		//Caps the amount of servers that can be allocated to 8
 		if (serversNeeded > 8) {
@@ -213,7 +213,7 @@ public class GRPCClientService {
 		}
 
 		//Prints new estimates, based on the number of servers assigned, on the client
-		System.out.println("Servers Assigned: " + serversNeeded + "\nNew time estimate: " + String.valueOf((int) ((footprint * (((blockDim * 2) * (blockDim * blockDim))) / 1000000000)/serversNeeded)) + "\n<================>");
+		System.out.println("[Servers Assigned]: " + serversNeeded + "\n[New time estimate]: " + String.valueOf((int) ((footprint * (((blockDim * 2) * (blockDim * blockDim))) / 1000000000)/serversNeeded)) + " Seconds \n<================>");
 
 		/*
 		//Used for debugging
@@ -244,6 +244,10 @@ public class GRPCClientService {
 							new gRPCBlockMultiplication(listOfStubs, atomicBlockOPQueue.get(i), serversNeeded)
 					)
 			);
+			//Prints progress - Per 100 blocks of results, so only shows when processing large input matracies (10x10+)
+			if((i % 100) == 0) {
+				System.out.println("> Still processing!\n----[Current block]: " + (i * 100));
+			}
 		}
 
 		//Used to format the results (which are recieved as features that contain List<com.myImplementation.grpc.array>) back to a series of 2x2 blocks
@@ -383,6 +387,9 @@ public class GRPCClientService {
 		//blockDim * blockDim addictions will be executed to get the result
 		int serversNeeded = (int) Math.ceil(((double) footprint * ((double) blockDim * (double) blockDim)) / (double) ((double) deadline * 1000000000.0)); //1 second = 1 million nano second - deadline is in seconds
 
+		//Prints estimates on client
+		System.out.println("\n<======Add======>\n[Estimated time (One Server)]: " + String.valueOf((int) ((footprint * ((blockDim * 2) * (blockDim * blockDim))) / 1000000000)) + " Seconds \n[Number of blocks to multiply]: " + String.valueOf((blockDim * 2) * (blockDim * blockDim)) + "\n[Servers Needed to meet deadline]: " + serversNeeded + "\n");
+
 		//Caps the amount of servers that can be allocated to 8
 		if (serversNeeded > 8) {
 			serversNeeded = 8;
@@ -391,6 +398,9 @@ public class GRPCClientService {
 		else if (serversNeeded == 0) {
 			serversNeeded = 1;
 		}
+
+		//Prints new estimates, based on the number of servers assigned, on the client
+		System.out.println("[Servers Assigned]: " + serversNeeded + "\n[New time estimate]: " + String.valueOf((int) ((footprint * (((blockDim * 2) * (blockDim * blockDim))) / 1000000000)/serversNeeded)) + " Seconds \n<================>");
 
 		//These theards will be used to send gRPC service requests concurrently (eliminating the need to wait for a response before sending another request)
 		ExecutorService serverThreadPool = Executors.newFixedThreadPool(serversNeeded);
@@ -407,6 +417,10 @@ public class GRPCClientService {
 							new gRPCBlockAddition(listOfStubs, allBlocks[0][i], allBlocks[1][i], i, serversNeeded)
 					)
 			);
+			//Prints progress - Per 1000 blocks of results, so only shows when processing large input matracies (100x100+)
+			if((i % 1000) == 0) {
+				System.out.println("> Still processing!\n----[Current block]: " + (i * 1000));
+			}
 		}
 
 		//Used to format the results (which are recieved as features that contain List<com.myImplementation.grpc.array>) back to a series of 2x2 blocks
