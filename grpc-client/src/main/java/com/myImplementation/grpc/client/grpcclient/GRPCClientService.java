@@ -513,7 +513,7 @@ public class GRPCClientService {
 			//Goes through each blocks in the operation set (the set of blocks that need to be mutliplied and added)
 			for (int i = 0; i < unprocessedBlockA.length; i++) {
 				multResults = stubMultRequest(stubPool.get(loadNo % noOfAllocatedServers), TwoDimArrayToTwoDimList(unprocessedBlockB[i]), TwoDimArrayToTwoDimList(unprocessedBlockA[i]));
-				loadNo++
+				loadNo++;
 				/*
 				//Used for debugging
 				System.out.println("\nMultResults (" + i + "):\n " + listUnpackToString(blockMultiplicationResponse.getMatrixCList()));
@@ -523,7 +523,7 @@ public class GRPCClientService {
 				//Accumilates the results of the multiplication into a single block
 				if (i > 0) {
 					addResults = stubAddRequest(stubPool.get(loadNo % noOfAllocatedServers), resultingMatrix, multResults);
-					loadNo++
+					loadNo++;
 					//If we have only finished the first calculation, we just store the result as there is nothing to add to
 					//otherwise else we do addition, assign the result to blockMultiplicationResponse2 and assign the result here
 					resultingMatrix = addResults;
