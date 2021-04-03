@@ -201,7 +201,7 @@ public class GRPCClientService {
 		int serversNeeded = (int) Math.ceil(((double) footprint * (((double) blockDim * 2.0) * ((double) blockDim * (double) blockDim))) / (double) ((double) deadline * 1000000000.0)); //1 second = 1 million nano second - deadline is in seconds
 
 		//Prints estimated time on clinet side
-		System.out.println("\n<================>\nEstimated time to needed to complete: " + String.valueOf((footprint * ((blockDim * 2) * (blockDim * blockDim)))) + "\n<================>");
+		System.out.println("\n<================>\nEstimated time to needed to complete: " + String.valueOf(((footprint * ((blockDim * 2) * (blockDim * blockDim))) / 1000000000)) + " Seconds \nNumber of blocks to multiply: " + String.valueOf((blockDim * 2) * (blockDim * blockDim))) + "\n<================>");
 
 		//Caps the amount of servers that can be allocated to 8
 		if (serversNeeded > 8) {
