@@ -207,7 +207,7 @@ public class GRPCClientService {
 		blockToProcess = (int) (blockDim * (blockDim * blockDim));
 
 		//Prints estimates on client
-		System.out.println("\n<======Mult======>\n[Estimated time (One Server)]: " + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) ((double) deadline * 1000000000.0))) + " Seconds (" + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) ((double) deadline * 1000000000.0))/60) + "Minutes, " + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) ((double) deadline * 1000000000.0))%60.0) + " Seconds)" + "\n[Number Of Blocks To Multiply]: " + String.valueOf(blockDim * (blockDim * blockDim)) + "\n[Servers Needed To Meet Deadline]: " + serversNeeded + "\n");
+		System.out.println("\n<======Mult======>\n[Estimated time (One Server)]: " + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) ((double) deadline * 1000000000.0))) + " Seconds (" + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) ((double) deadline * 1000000000.0))/60) + " Minutes, " + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) ((double) deadline * 1000000000.0))%60.0) + " Seconds)" + "\n[Number Of Blocks To Multiply]: " + String.valueOf(blockDim * (blockDim * blockDim)) + "\n[Servers Needed To Meet Deadline]: " + serversNeeded + "\n");
 
 		//Caps the amount of servers that can be allocated to 8
 		if (serversNeeded > 8) {
@@ -416,7 +416,7 @@ public class GRPCClientService {
 		}
 
 		//Prints new estimates, based on the number of servers assigned, on the client
-		System.out.println("[Servers Assigned]: " + serversNeeded + "\n[New Time Estimate]: " + String.valueOf((int) ((footprint * ((blockDim * blockDim)) / 1000000000)/serversNeeded)) + " Seconds (" + String.valueOf((int) ((footprint * ((blockDim * blockDim)) / 1000000000)/serversNeeded)/60) + "Minutes" + String.valueOf((int) ((footprint * ((blockDim * blockDim)) / 1000000000)/serversNeeded)%60) + "Seconds" + ") \n<================>\n");
+		System.out.println("[Servers Assigned]: " + serversNeeded + "\n[New Time Estimate]: " + String.valueOf((int) ((footprint * ((blockDim * blockDim)) / 1000000000)/serversNeeded)) + " Seconds (" + String.valueOf((int) ((footprint * ((blockDim * blockDim)) / 1000000000)/serversNeeded)/60) + " Minutes, " + String.valueOf((int) ((footprint * ((blockDim * blockDim)) / 1000000000)/serversNeeded)%60) + " Seconds" + ") \n<================>\n");
 
 		//These theards will be used to send gRPC service requests concurrently (eliminating the need to wait for a response before sending another request)
 		ExecutorService serverThreadPool = Executors.newFixedThreadPool(serversNeeded);
