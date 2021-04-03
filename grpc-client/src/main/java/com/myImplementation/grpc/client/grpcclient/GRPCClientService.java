@@ -200,8 +200,8 @@ public class GRPCClientService {
 		//And there are blockDim * blockDim blocks in the matrix - this this will be the numver of multiplication operations that will take place
 		int serversNeeded = (int) Math.ceil(((double) footprint * (((double) blockDim * 2.0) * ((double) blockDim * (double) blockDim))) / (double) ((double) deadline * 1000000000.0)); //1 second = 1 million nano second - deadline is in seconds
 
-		//Prints estimated time on clinet side
-		System.out.println("\n<================>\nEstimated time to needed to complete: " + String.valueOf((int) ((footprint * ((blockDim * 2) * (blockDim * blockDim))) / 1000000000)) + " Seconds \nNumber of blocks to multiply: " + String.valueOf((blockDim * 2) * (blockDim * blockDim)) + "\n<================>");
+		//Prints estimates on client
+		System.out.println("\n<================>\nEstimated time to needed to complete for a single server: " + String.valueOf((int) ((footprint * ((blockDim * 2) * (blockDim * blockDim))) / 1000000000)) + " Seconds \nNumber of blocks to multiply: " + String.valueOf((blockDim * 2) * (blockDim * blockDim)) + "\nServers Needed to meet deadline: " + serversNeeded);
 
 		//Caps the amount of servers that can be allocated to 8
 		if (serversNeeded > 8) {
@@ -211,6 +211,9 @@ public class GRPCClientService {
 		else if (serversNeeded == 0) {
 			serversNeeded = 1;
 		}
+
+		//Prints new estimates, based on the number of servers assigned, on the client
+		System.out.println("Servers Assigned: " + serversNeeded + "\nNew time estimate: " + String.valueOf((int) ((footprint * (((blockDim * 2) * (blockDim * blockDim))) / 1000000000)/serversNeeded)) + "\n<================>")
 
 		/*
 		//Used for debugging
