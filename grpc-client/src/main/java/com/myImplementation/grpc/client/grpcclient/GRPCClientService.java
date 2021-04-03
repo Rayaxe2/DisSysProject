@@ -51,7 +51,7 @@ public class GRPCClientService {
 		//Makes the sure matrix is square - if it is not, an error message will be returned to the rest controller
 		if (!(a1D.length == (dim * dim) && b1D.length == (dim * dim))) {
 			channel.shutdown();
-			return "Error: Make sure both matracies have the dimentions " + Integer.toString(dim) + "x" + Integer.toString(dim);
+			return "Error: Make sure both matracies have the dimentions " + Integer.toString(dim) + "x" + Integer.toString(dim) + "\n Length Of Matrix A: " + a1D.length + "\n Length Of Matrix B: " + b1D.length + "\nExpected Length: " + (dim*dim);
 		}
 
 		//Also checks that the matracies' dimentions are a mutliple of 2 since we want n^2 matracies only - so we can break them down
