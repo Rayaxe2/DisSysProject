@@ -182,7 +182,7 @@ public class GRPCClientService {
 
 
 		//Used for debugging
-		System.out.println("\n" + "atomicBlockOPQueue Size: " + atomicBlockOPQueue.size() + "\nContents A: \n" + Arrays.deepToString(atomicBlockOPQueue.get(0).get(0)) + "\nContents B: \n" + Arrays.deepToString(atomicBlockOPQueue.get(1).get(0)));
+		System.out.println("\n" + "atomicBlockOPQueue Size: " + atomicBlockOPQueue.size() + "\nContents A: \n" + Arrays.deepToString(atomicBlockOPQueue.get(0).get(0)) + "\nContents B: \n" + Arrays.deepToString(atomicBlockOPQueue.get(0).get(1)));
 
 
 		//Stores the time before a gRPC functiona call
@@ -194,7 +194,7 @@ public class GRPCClientService {
 						.clearMatrixA()
 						.clearMatrixB()
 						.addAllMatrixA(TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(0))))
-						.addAllMatrixB(TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(1).get(0))))
+						.addAllMatrixB(TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(1))))
 						.build()
 		);
 		//Stores the time after gRPC functiona call
