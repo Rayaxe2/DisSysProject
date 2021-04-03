@@ -20,6 +20,7 @@ import com.myImplementation.grpc.MatrixMultServiceGrpc;
 
 @Service
 public class GRPCClientService {
+	int progressCounter = 0;
 	//List of server IPs for stubs to connect to
 	String[] serverIPs = new String[]{"34.203.38.53", "54.157.147.19", "3.83.226.8", "54.208.88.73", "54.174.173.230", "54.236.246.232", "54.166.38.17", "3.91.176.84"};
 	//Stores of list/pool of 8 stubs for the threads to use
@@ -244,10 +245,6 @@ public class GRPCClientService {
 							new gRPCBlockMultiplication(listOfStubs, atomicBlockOPQueue.get(i), serversNeeded)
 					)
 			);
-			//Prints progress - Per 100 blocks of results, so only shows when processing large input matracies (10x10+)
-			if((i % 100) == 0 && i != 0) {
-				System.out.println("> Still processing!\n----[Current block]: " + i);
-			}
 		}
 
 		//Used to format the results (which are recieved as features that contain List<com.myImplementation.grpc.array>) back to a series of 2x2 blocks
@@ -417,10 +414,6 @@ public class GRPCClientService {
 							new gRPCBlockAddition(listOfStubs, allBlocks[0][i], allBlocks[1][i], i, serversNeeded)
 					)
 			);
-			//Prints progress - Per 1000 blocks of results, so only shows when processing large input matracies (100x100+)
-			if((i % 1000) == 0 && i != 0) {
-				System.out.println("> Still processing!\n----[Current block]: " + i);
-			}
 		}
 
 		//Used to format the results (which are recieved as features that contain List<com.myImplementation.grpc.array>) back to a series of 2x2 blocks
@@ -585,6 +578,11 @@ public class GRPCClientService {
 						.addAllMatrixB(mB)
 						.build()
 		);
+		progressCounter++
+		//Prints progress - Per 100 blocks of results, so only shows when processing large input matracies (10x10+)
+		if((progressCounter % 100) == 0 && progressCounter != 0) {
+			System.out.println("> Still processing!\n----[Current block]: " + progressCounter);
+		}
 		return reply.getMatrixCList();
 	}
 
@@ -599,6 +597,11 @@ public class GRPCClientService {
 						.addAllMatrixB(mB)
 						.build()
 		);
+		progressCounter++
+		//Prints progress - Per 100 blocks of results, so only shows when processing large input matracies (10x10+)
+		if((progressCounter % 1000) == 0 && progressCounter != 0) {
+			System.out.println("> Still processing!\n----[Current block]: " + progressCounter);
+		}
 		return reply.getMatrixCList();
 	}
 
