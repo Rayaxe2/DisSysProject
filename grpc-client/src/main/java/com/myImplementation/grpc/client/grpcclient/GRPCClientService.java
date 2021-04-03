@@ -187,25 +187,29 @@ public class GRPCClientService {
 
 		//The first request can sometimes take longer than the second (as a result of processes like caching)
 		//So these call are made before footprinting to make sure that the call made during footprinting more representative of how long a call takes
-		for(int i = 0; i < 100; i++) {
-			List<com.myImplementation.grpc.array> testRequest1 = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(allBlocks[0][0]), TwoDimArrayToTwoDimList(allBlocks[0][0]));
+		for(int i = 0; i < 25; i++) {
+			List<com.myImplementation.grpc.array> preTestMultRequest = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(allBlocks[0][0]), TwoDimArrayToTwoDimList(allBlocks[0][0]));
+			List<com.myImplementation.grpc.array> preTestAddRequest = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(0))), TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(1))));
+
 		}
 
-		//Stores the time before a gRPC functiona call
+		//Stores the time before a gRPC functiona calls
 		long startTime = System.nanoTime();
 
-		//Calls the multiplyBlockRequest gRPC function through A stub with the first pair of blocks from the block operation queue ("atomicBlockOPQueue")
+		//Calls the gRPC functions for adding and multiplying through a stub with the first pair of blocks from the block operation queue ("atomicBlockOPQueue")
+		//Note that each block multiplication calls the block multiplication gRPC function once and block addition gRPC function the same amount of time minus 1
 		//The result is not used as we are only making the call to do footprinting
-		List<com.myImplementation.grpc.array> testRequest = stubMultRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(0))), TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(1))));
+		List<com.myImplementation.grpc.array> testMultRequest = stubMultRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(0))), TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(1))));
+		List<com.myImplementation.grpc.array> testAddRequest = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(0))), TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(1))));
 
-		//Stores the time after gRPC functiona call
+		//Stores the time after gRPC functiona calls
 		long endTime = System.nanoTime();
 		//Stores the difference between the start and end time in nanoseconds (1 second = 1,000,000ns)
 		long footprint = (endTime - startTime);
 		double footprintInSeconds = (double) footprint / 1000000000.0;
 		//Calculates an estimate for the amount of servers needed to meet the deadline given the amount of operations that will be needed
 		//(blockDim * (blockDim * blockDim)) - every block in the final matrix will have been produced through ((blockDim * 2)/2) block multiplications/grpc calls (multiplying pairs in the queue),
-		//And there are blockDim * blockDim blocks in the matrix - this this will be the numver of multiplication operations that will take place
+		//And there are blockDim * blockDim blocks in the matrix - this this will be the number of multiplication and addition operations that will take place
 		int serversNeeded = (int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) ((double) deadline * 1000000000.0)); //1 second = 1 million nano second - deadline is in seconds
 
 		//Records the number of blocks that need to be mutliplied/the number of operations
