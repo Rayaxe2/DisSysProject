@@ -20,7 +20,9 @@ import com.myImplementation.grpc.MatrixMultServiceGrpc;
 
 @Service
 public class GRPCClientService {
+	//Used to count/display progress on client side
 	static int progressCounter = 0;
+	static int blockToProcess = 0;
 	//List of server IPs for stubs to connect to
 	String[] serverIPs = new String[]{"34.203.38.53", "54.157.147.19", "3.83.226.8", "54.208.88.73", "54.174.173.230", "54.236.246.232", "54.166.38.17", "3.91.176.84"};
 	//Stores of list/pool of 8 stubs for the threads to use
@@ -201,8 +203,11 @@ public class GRPCClientService {
 		//And there are blockDim * blockDim blocks in the matrix - this this will be the numver of multiplication operations that will take place
 		int serversNeeded = (int) Math.ceil(((double) footprint * (((double) blockDim * 2.0) * ((double) blockDim * (double) blockDim))) / (double) ((double) deadline * 1000000000.0)); //1 second = 1 million nano second - deadline is in seconds
 
+		//records the number of blocks that need to be mutliplied/the number of operations
+		blockToProcess = (int) ((footprint * ((blockDim * 2) * (blockDim * blockDim))) / 1000000000);
+
 		//Prints estimates on client
-		System.out.println("\n<======Mult======>\n[Estimated time (One Server)]: " + String.valueOf((int) ((footprint * ((blockDim * 2) * (blockDim * blockDim))) / 1000000000)) + " Seconds \n[Number of blocks to multiply]: " + String.valueOf((blockDim * 2) * (blockDim * blockDim)) + "\n[Servers Needed to meet deadline]: " + serversNeeded + "\n");
+		System.out.println("\n<======Mult======>\n[Estimated time (One Server)]: " + String.valueOf(blockToProcess) + " Seconds \n[Number of blocks to multiply]: " + String.valueOf((blockDim * 2) * (blockDim * blockDim)) + "\n[Servers Needed to meet deadline]: " + serversNeeded + "\n");
 
 		//Caps the amount of servers that can be allocated to 8
 		if (serversNeeded > 8) {
@@ -275,6 +280,10 @@ public class GRPCClientService {
 
 		//Shuts down the pool of threads once we have fetched the results
 		serverThreadPool.shutdownNow();
+
+		//resets progress
+		progressCounter = 0;
+		blockToProcess = 0;
 
 		//Makes the funciton return the result of the operation/service to the rest controller - which calls it
 		return listOfBlocksToString(listOfResults); //listOfBlocksToString converts the lists of blocks into a formatted string
@@ -384,8 +393,11 @@ public class GRPCClientService {
 		//blockDim * blockDim addictions will be executed to get the result
 		int serversNeeded = (int) Math.ceil(((double) footprint * ((double) blockDim * (double) blockDim)) / (double) ((double) deadline * 1000000000.0)); //1 second = 1 million nano second - deadline is in seconds
 
+		//records the number of blocks that need to be mutliplied/the number of operations
+		blockToProcess = (int) ((footprint * ((blockDim * 2) * (blockDim * blockDim))) / 1000000000);
+
 		//Prints estimates on client
-		System.out.println("\n<======Add======>\n[Estimated time (One Server)]: " + String.valueOf((int) ((footprint * ((blockDim * 2) * (blockDim * blockDim))) / 1000000000)) + " Seconds \n[Number of blocks to multiply]: " + String.valueOf((blockDim * 2) * (blockDim * blockDim)) + "\n[Servers Needed to meet deadline]: " + serversNeeded + "\n");
+		System.out.println("\n<======Add======>\n[Estimated time (One Server)]: " + String.valueOf(blockToProcess) + " Seconds \n[Number of blocks to multiply]: " + String.valueOf((blockDim * 2) * (blockDim * blockDim)) + "\n[Servers Needed to meet deadline]: " + serversNeeded + "\n");
 
 		//Caps the amount of servers that can be allocated to 8
 		if (serversNeeded > 8) {
@@ -438,6 +450,10 @@ public class GRPCClientService {
 
 		//Shuts down the server once it's done processing the remaining threads
 		serverThreadPool.shutdownNow();
+
+		//resets progress
+		progressCounter = 0;
+		blockToProcess = 0;
 
 		//Makes the funciton return the result of the operation/service to the rest controller - which calls it
 		return listOfBlocksToString(listOfResults); //listOfBlocksToString converts the lits of blocks into a formatted string
@@ -579,9 +595,9 @@ public class GRPCClientService {
 						.build()
 		);
 		progressCounter++;
-		//Prints progress - Per 100 blocks of results, so only shows when processing large input matracies (10x10+)
+		//Prints progress - Per 1000 blocks of results, so only shows when processing large input matracies (100x100+)
 		if((progressCounter % 100) == 0 && progressCounter != 0) {
-			System.out.println("> Still processing!\n----[Current block]: " + progressCounter);
+			System.out.println("> Still processing!\n----[Progress]: " + progressCounter + "/" + blockToProcess + " blocks proccessed");
 		}
 		return reply.getMatrixCList();
 	}
@@ -598,9 +614,9 @@ public class GRPCClientService {
 						.build()
 		);
 		progressCounter++;
-		//Prints progress - Per 100 blocks of results, so only shows when processing large input matracies (10x10+)
+		//Prints progress - Per 1000 blocks of results, so only shows when processing large input matracies (100x100+)
 		if((progressCounter % 1000) == 0 && progressCounter != 0) {
-			System.out.println("> Still processing!\n----[Current block]: " + progressCounter);
+			System.out.println("> Still processing!\n----[Progress]: " + progressCounter + "/" + blockToProcess + " blocks proccessed");
 		}
 		return reply.getMatrixCList();
 	}
