@@ -187,7 +187,7 @@ public class GRPCClientService {
 
 		//The first request can sometimes take longer than the second (as a result of processes like caching)
 		//So these call are made before footprinting to make sure that the call made during footprinting more representative of how long a call takes
-		for(int i = 0; i < 25; i++) {
+		for(int i = 0; i < 100; i++) {
 			List<com.myImplementation.grpc.array> preTestMultRequest = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(allBlocks[0][0]), TwoDimArrayToTwoDimList(allBlocks[0][0]));
 			List<com.myImplementation.grpc.array> preTestAddRequest = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(0))), TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(1))));
 
