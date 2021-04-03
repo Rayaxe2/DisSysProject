@@ -52,6 +52,7 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 
 			//Print out a message saying you received a message from the client - for the server to see/display
 			System.out.println("Multiplication Request recieved from client:\n" + request);
+			System.out.println("\n<==================>\n");
 
 			//builds a response
 			multiplyBlockResponse.Builder response = multiplyBlockResponse.newBuilder();
@@ -98,6 +99,7 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 
 			//Print out a message saying you received a message from the client - for the server to see/display
 			System.out.println("Add Request recieved from client:\n" + request);
+			System.out.println("\n<==================>\n");
 
 			//Converts 2D array structure back into the List<com.myImplementation.grpc.array>, since 2D arrays can not be send in requests and responses
 			//But List<com.myImplementation.grpc.array> structures can

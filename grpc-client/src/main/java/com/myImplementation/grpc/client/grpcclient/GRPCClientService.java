@@ -163,7 +163,7 @@ public class GRPCClientService {
 				newQueue.add(IntArrayToIntergerArray(allBlocks[1][currentCol + (i * blockDim)]));
 				newQueue.add(IntArrayToIntergerArray(allBlocks[0][(currentRow * blockDim) + i]));
 
-
+				/*
 				//Used for debugging
 				//System.out.println("\nIndex for B " + (a + 1) + "(Pair " + (i + 1) + ")" + ":\n " + ((currentRow * blockDim) + i));
 
@@ -172,8 +172,7 @@ public class GRPCClientService {
 
 				System.out.println("\nBlock from B " + (a + 1) + "(Pair " + (i + 1) + ")" + ": ");
 				System.out.println(Arrays.deepToString(allBlocks[0][(currentRow * blockDim) + i]));
-
-
+				*/
 			}
 			//Adds each set of pairs of blocks that need to be multiplied to produce a single block into the list
 			//To form a queue of operations
@@ -182,24 +181,19 @@ public class GRPCClientService {
 
 
 		//Used for debugging
-		System.out.println("\n" + "atomicBlockOPQueue Size: " + atomicBlockOPQueue.size() + "\nContents A: \n" + Arrays.deepToString(atomicBlockOPQueue.get(0).get(0)) + "\nContents B: \n" + Arrays.deepToString(atomicBlockOPQueue.get(0).get(1)));
+		//System.out.println("\n" + "atomicBlockOPQueue Size: " + atomicBlockOPQueue.size() + "\nContents A: \n" + Arrays.deepToString(atomicBlockOPQueue.get(0).get(0)) + "\nContents B: \n" + Arrays.deepToString(atomicBlockOPQueue.get(0).get(1)));
 
 
 		//Stores the time before a gRPC functiona call
 		long startTime = System.nanoTime();
-		//Gets a response by calling the multiplyBlockRequest from a stub with an arbirtrary block input from the queue
-		//The result is discarded
-		multiplyBlockResponse reply = listOfStubs.get(0).multiplyBlock(
-				multiplyBlockRequest.newBuilder()
-						.clearMatrixA()
-						.clearMatrixB()
-						.addAllMatrixA(TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(0))))
-						.addAllMatrixB(TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(1))))
-						.build()
-		);
+
+		//Calls the multiplyBlockRequest gRPC function through A stub with the first pair of blocks from the block operation queue ("atomicBlockOPQueue")
+		//The result is not used as we are only making the call to do footprinting
+		List<com.myImplementation.grpc.array> testRequest = stubMultRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(0))), TwoDimArrayToTwoDimList(IntergerArrayToIntArray(atomicBlockOPQueue.get(0).get(1))));
+
 		//Stores the time after gRPC functiona call
 		long endTime = System.nanoTime();
-		//Stores the difference between the start and end time
+		//Stores the difference between the start and end time in nanoseconds (1 second = 1,000,000ns)
 		long footprint = (endTime - startTime);
 		//Calculates an estimate for the amount of servers needed to meet the deadline given the amount of operations that will be needed
 		//((blockDim * 2) * (blockDim * blockDim)) - every block in the final matrix will have been produced through (blockDim * 2) block multiplications/grpc calls,
@@ -370,16 +364,11 @@ public class GRPCClientService {
 
 		//Stores the time before gRPC functiona call
 		long startTime = System.nanoTime();
-		//gets a response by calling the addBlockRequest from the stub with an arbirtrary block input from the queue
-		//The result is discarded
-		multiplyBlockResponse reply = listOfStubs.get(0).addBlock(
-				multiplyBlockRequest.newBuilder()
-						.clearMatrixA()
-						.clearMatrixB()
-						.addAllMatrixA(TwoDimArrayToTwoDimList(allBlocks[0][0]))
-						.addAllMatrixB(TwoDimArrayToTwoDimList(allBlocks[0][0]))
-						.build()
-		);
+
+		//gets a response by calling the addBlockRequest from the stub with the first block input from the queue
+		//The result is not used as the call is exclussively made for footprinting
+		List<com.myImplementation.grpc.array> testRequest = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(allBlocks[0][0]), TwoDimArrayToTwoDimList(allBlocks[0][0]));
+
 		//Stores the time after gRPC functiona call
 		long endTime = System.nanoTime();
 		//Stores the difference between the start and end time
