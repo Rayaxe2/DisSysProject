@@ -182,10 +182,14 @@ public class GRPCClientService {
 			atomicBlockOPQueue.add(newQueue);
 		}
 
-
 		//Used for debugging
 		//System.out.println("\n" + "atomicBlockOPQueue Size: " + atomicBlockOPQueue.size() + "\nContents A: \n" + Arrays.deepToString(atomicBlockOPQueue.get(0).get(0)) + "\nContents B: \n" + Arrays.deepToString(atomicBlockOPQueue.get(0).get(1)));
 
+		//The first request can sometimes take longer than the second (as a result of processes like caching)
+		//So these call are made before footprinting to make sure that the call made during footprinting more representative of how long a call takes
+		for(int i = 0; i < 100; i++) {
+			List<com.myImplementation.grpc.array> testRequest1 = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(allBlocks[0][0]), TwoDimArrayToTwoDimList(allBlocks[0][0]));
+		}
 
 		//Stores the time before a gRPC functiona call
 		long startTime = System.nanoTime();
@@ -222,12 +226,10 @@ public class GRPCClientService {
 		//Prints new estimates, based on the number of servers assigned, on the client
 		System.out.println("[Servers Assigned]: " + serversNeeded + "\n[New Time Estimate]: " + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) (1000000000.0))/serversNeeded) + " Seconds (" + String.valueOf(((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) (1000000000.0))/serversNeeded)/60) + " Minutes, " + String.valueOf((int) ((footprint * ((blockDim * (blockDim * blockDim))) / 1000000000)/serversNeeded)%60) + " Seconds)" + "\n<================>\n");
 
-		/*
 		//Used for debugging
 		//double test = (int) Math.ceil(((double) footprint * (((double) blockDim * (double) 2) * ((double) blockDim * (double) blockDim))));
 		System.out.println("Servers Needed: " + serversNeeded + "\nFootprint: " + footprint + "\nDeadline: " + deadline + "\n");
 		//+ "\nNo of Block Operations: " + String.valueOf(test)
-		 */
 
 		//These theards will be used to send gRPC service requests concurrently
 		//(eliminating the need to wait for a response before sending another request)
