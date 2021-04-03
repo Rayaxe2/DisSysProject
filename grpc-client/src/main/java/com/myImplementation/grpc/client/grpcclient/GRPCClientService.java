@@ -178,7 +178,7 @@ public class GRPCClientService {
 		}
 
 		//Prints new estimates, based on the number of servers assigned, on the client
-		System.out.println("[Servers Assigned]: " + serversNeeded + "\n[New Time Estimate]: " + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) (1000000000.0))/serversNeeded) + " Seconds (" + String.valueOf(((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) (1000000000.0))/serversNeeded)/60) + " Minutes, " + String.valueOf((int) ((footprint * ((blockDim * (blockDim * blockDim))) / 1000000000)/serversNeeded)%60) + " Seconds)" + "\n<================>\n");
+		System.out.println("[Servers Assigned]: " + serversNeeded + "\n[New Time Estimate]: " + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) (1000000000.0))/serversNeeded) + " Seconds (" + String.valueOf((int)(Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) (1000000000.0))/(double) serversNeeded)/60.0) + " Minutes, " + String.valueOf((int) ((footprint * ((blockDim * (blockDim * blockDim))) / 1000000000)/(double) serversNeeded)%60) + " Seconds)" + "\n<================>\n");
 
 		System.out.println("Servers Needed: " + serversNeeded + "\nFootprint: " + footprint + "\nDeadline: " + deadline + "\n");
 
