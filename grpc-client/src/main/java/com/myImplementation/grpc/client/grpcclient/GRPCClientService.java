@@ -163,7 +163,7 @@ public class GRPCClientService {
 				newQueue.add(IntArrayToIntergerArray(allBlocks[1][currentCol + (i * blockDim)]));
 				newQueue.add(IntArrayToIntergerArray(allBlocks[0][(currentRow * blockDim) + i]));
 
-				/*
+
 				//Used for debugging
 				//System.out.println("\nIndex for B " + (a + 1) + "(Pair " + (i + 1) + ")" + ":\n " + ((currentRow * blockDim) + i));
 
@@ -172,7 +172,7 @@ public class GRPCClientService {
 
 				System.out.println("\nBlock from B " + (a + 1) + "(Pair " + (i + 1) + ")" + ": ");
 				System.out.println(Arrays.deepToString(allBlocks[0][(currentRow * blockDim) + i]));
-				 */
+
 
 			}
 			//Adds each set of pairs of blocks that need to be multiplied to produce a single block into the list
@@ -182,7 +182,7 @@ public class GRPCClientService {
 
 
 		//Used for debugging
-		System.out.println("\n" + "atomicBlockOPQueue Size: " + atomicBlockOPQueue.size() + "\nContents: \n" + Arrays.deepToString(atomicBlockOPQueue));
+		System.out.println("\n" + "atomicBlockOPQueue Size: " + atomicBlockOPQueue.size() + "\nContents A: \n" + Arrays.deepToString(atomicBlockOPQueue.get(0).get(0)) + "\nContents B: \n" + Arrays.deepToString(atomicBlockOPQueue).get(1).get(0));
 
 
 		//Stores the time before a gRPC functiona call
