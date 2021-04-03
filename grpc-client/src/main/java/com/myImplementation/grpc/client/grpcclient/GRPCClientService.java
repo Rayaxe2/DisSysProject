@@ -179,10 +179,10 @@ public class GRPCClientService {
 			atomicBlockOPQueue.add(newQueue);
 		}
 
-		/*
+
 		//Used for debugging
 		System.out.println("\n" + "atomicBlockOPQueue Size: " + atomicBlockOPQueue.size());
-		 */
+
 
 		//Stores the time before a gRPC functiona call
 		long startTime = System.nanoTime();
@@ -313,7 +313,7 @@ public class GRPCClientService {
 		int dim = dimentions;
 
 		//Makes the sure matrix is square - if it is not, an error message will be returned to the rest controller
-		if (!(a1D.length == (dim * dim) && b1D.length == (dim * dim))) {
+		if (a1D.length != (dim * dim) || b1D.length != (dim * dim)) {
 			return "Error: Make sure both matracies have the dimentions " + Integer.toString(dim) + "x" + Integer.toString(dim) + "\n Length Of Matrix A: " + a1D.length + "\n Length Of Matrix B: " + b1D.length + "\nExpected Length: " + (dim*dim);
 		}
 
