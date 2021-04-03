@@ -182,7 +182,7 @@ public class GRPCClientService {
 
 
 		//Used for debugging
-		System.out.println("\n" + "atomicBlockOPQueue Size: " + atomicBlockOPQueue.size() + "\nContents A: \n" + Arrays.deepToString(atomicBlockOPQueue.get(0).get(0)) + "\nContents B: \n" + Arrays.deepToString(atomicBlockOPQueue).get(1).get(0));
+		System.out.println("\n" + "atomicBlockOPQueue Size: " + atomicBlockOPQueue.size() + "\nContents A: \n" + Arrays.deepToString(atomicBlockOPQueue.get(0).get(0)) + "\nContents B: \n" + Arrays.deepToString(atomicBlockOPQueue.get(1).get(0)));
 
 
 		//Stores the time before a gRPC functiona call
