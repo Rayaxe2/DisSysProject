@@ -523,7 +523,7 @@ public class GRPCClientService {
 
 			//Goes through each blocks in the operation set (the set of blocks that need to be mutliplied and added)
 			for (int i = 0; i < unprocessedBlockA.length; i++) {
-				multResults = stubMultRequest(stubPool.get(i % stubPool.size()), TwoDimArrayToTwoDimList(unprocessedBlockA[i]), TwoDimArrayToTwoDimList(unprocessedBlockB[i]));
+				multResults = stubMultRequest(stubPool.get(i % stubPool.size()), TwoDimArrayToTwoDimList(unprocessedBlockB[i]), TwoDimArrayToTwoDimList(unprocessedBlockA[i]));
 				/*
 				//Used for debugging
 				System.out.println("\nMultResults (" + i + "):\n " + listUnpackToString(blockMultiplicationResponse.getMatrixCList()));
