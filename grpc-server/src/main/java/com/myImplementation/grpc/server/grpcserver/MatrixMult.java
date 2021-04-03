@@ -337,3 +337,34 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 		return res;
 	}
 }
+
+/*
+//Code used for guidance - ignore
+
+@GrpcService
+//In PingPongService.proto there is the service "PingPongService"
+public class PingPongServiceImpl extends PingPongServiceGrpc.PingPongServiceImplBase { //PingPongServiceImplBase is generated from the proto file and deals with basic network communication
+
+    @Override //We override the ping function declared in proto
+	//Ping is a rpc function in the proto (within the PingPongService service)
+    public void ping(PingRequest request, StreamObserver<PongResponse> responseObserver) { //issue with using uppercase as first word for method name
+    	//Proto has a message called PingRequest
+		//StreamObserver<PongResponse> "responseObserver" lets you do async communication if you want
+
+		//Makes a string, "ping", with the word "Pong"
+		String ping = new StringBuilder()
+                .append("pong")
+                .toString();
+
+		//Builds a response constainer - setting "pong" (a message varaible in the proto's "PongResponse" message) to the value of the string Ping ("Pong")
+		PongResponse response = PongResponse.newBuilder()
+                .setPong(ping)
+                .build();  //.build builds the response with the info we provided
+
+		//specifies we want to send it on the next iteration
+		responseObserver.onNext(response);
+		//Then marks it as complete
+		responseObserver.onCompleted();
+    }
+}
+ */
