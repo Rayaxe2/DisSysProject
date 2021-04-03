@@ -198,6 +198,7 @@ public class GRPCClientService {
 		long endTime = System.nanoTime();
 		//Stores the difference between the start and end time in nanoseconds (1 second = 1,000,000ns)
 		long footprint = (endTime - startTime);
+		double footprintInSeconds = (double) footprint / 1000000000.0
 		//Calculates an estimate for the amount of servers needed to meet the deadline given the amount of operations that will be needed
 		//(blockDim * (blockDim * blockDim)) - every block in the final matrix will have been produced through ((blockDim * 2)/2) block multiplications/grpc calls (multiplying pairs in the queue),
 		//And there are blockDim * blockDim blocks in the matrix - this this will be the numver of multiplication operations that will take place
@@ -207,7 +208,7 @@ public class GRPCClientService {
 		blockToProcess = (int) (blockDim * (blockDim * blockDim));
 
 		//Prints estimates on client
-		System.out.println("\n<======Mult======>\n[Estimated time (One Server)]: " + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) ((double) (deadline * 1000000000.0)))) + " Seconds (" + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) ((double) (deadline * 1000000000.0)))/60) + " Minutes, " + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) ((double) (deadline * 1000000000.0)))%60.0) + " Seconds)" + "\n[Number Of Blocks To Multiply]: " + String.valueOf(blockDim * (blockDim * blockDim)) + "\n[Servers Needed To Meet Deadline]: " + serversNeeded + "\n");
+		System.out.println("\n<======Mult======>\n[Estimated Time (One Server)]: " + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) ((double) (deadline * 1000000000.0)))) + " Seconds (" + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) ((double) (deadline * 1000000000.0)))/60) + " Minutes, " + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) ((double) (deadline * 1000000000.0)))%60.0) + " Seconds)\n [FootPrint]:" + String.valueOf(footprintInSeconds) + "\n[Number Of Blocks To Multiply]: " + String.valueOf(blockDim * (blockDim * blockDim)) + "\n[Servers Needed To Meet Deadline]: " + serversNeeded + "\n");
 
 		//Caps the amount of servers that can be allocated to 8
 		if (serversNeeded > 8) {
