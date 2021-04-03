@@ -203,8 +203,8 @@ public class GRPCClientService {
 		//And there are blockDim * blockDim blocks in the matrix - this this will be the numver of multiplication operations that will take place
 		int serversNeeded = (int) Math.ceil(((double) footprint * (((double) blockDim * 2.0) * ((double) blockDim * (double) blockDim))) / (double) ((double) deadline * 1000000000.0)); //1 second = 1 million nano second - deadline is in seconds
 
-		//records the number of blocks that need to be mutliplied/the number of operations
-		blockToProcess = (int) ((footprint * ((blockDim * 2) * (blockDim * blockDim))) / 1000000000);
+		//Records the number of blocks that need to be mutliplied/the number of operations
+		blockToProcess = (int) ((blockDim * 2) * (blockDim * blockDim));
 
 		//Prints estimates on client
 		System.out.println("\n<======Mult======>\n[Estimated time (One Server)]: " + String.valueOf(blockToProcess) + " Seconds \n[Number of blocks to multiply]: " + String.valueOf((blockDim * 2) * (blockDim * blockDim)) + "\n[Servers Needed to meet deadline]: " + serversNeeded + "\n");
@@ -284,6 +284,8 @@ public class GRPCClientService {
 		//resets progress
 		progressCounter = 0;
 		blockToProcess = 0;
+
+		System.out.println("Done!");
 
 		//Makes the funciton return the result of the operation/service to the rest controller - which calls it
 		return listOfBlocksToString(listOfResults); //listOfBlocksToString converts the lists of blocks into a formatted string
@@ -398,8 +400,8 @@ public class GRPCClientService {
 		//blockDim * blockDim addictions will be executed to get the result
 		int serversNeeded = (int) Math.ceil(((double) footprint * ((double) blockDim * (double) blockDim)) / (double) ((double) deadline * 1000000000.0)); //1 second = 1 million nano second - deadline is in seconds
 
-		//records the number of blocks that need to be mutliplied/the number of operations
-		blockToProcess = (int) ((footprint * ((blockDim * 2) * (blockDim * blockDim))) / 1000000000);
+		//Records the number of blocks that need to be mutliplied/the number of operations
+		blockToProcess = (int) ((blockDim * 2) * (blockDim * blockDim));
 
 		//Prints estimates on client
 		System.out.println("\n<======Add======>\n[Estimated time (One Server)]: " + String.valueOf(blockToProcess) + " Seconds \n[Number of blocks to multiply]: " + String.valueOf((blockDim * 2) * (blockDim * blockDim)) + "\n[Servers Needed to meet deadline]: " + serversNeeded + "\n");
@@ -459,6 +461,8 @@ public class GRPCClientService {
 		//resets progress
 		progressCounter = 0;
 		blockToProcess = 0;
+
+		System.out.println("Done!");
 
 		//Makes the funciton return the result of the operation/service to the rest controller - which calls it
 		return listOfBlocksToString(listOfResults); //listOfBlocksToString converts the lits of blocks into a formatted string
@@ -556,9 +560,9 @@ public class GRPCClientService {
 				System.out.println("\nresultingMatrix:\n " + listUnpackToString(resultingMatrix));
 				 */
 				progressCounter++;
-				//Prints progress - Per 1000 blocks of results, so only shows when processing large input matracies (100x100+)
+				//Prints progress - Per 1000 blocks that are
 				if((progressCounter % 1000) == 0 && progressCounter != 0) {
-					System.out.println("> Still processing!\n----[Progress]: " + progressCounter + "/" + blockToProcess + " blocks proccessed");
+					System.out.println("----[Progress]: <<" + progressCounter + "/" + blockToProcess + ">> Blocks Multiplied and Summed");
 				}
 			}
 			return resultingMatrix;
@@ -589,9 +593,9 @@ public class GRPCClientService {
 		@Override
 		public List<com.myImplementation.grpc.array> call() {
 			progressCounter++;
-			//Prints progress - Per 1000 blocks of results, so only shows when processing large input matracies (100x100+)
-			if((progressCounter % 1000) == 0 && progressCounter != 0) {
-				System.out.println("> Still processing!\n----[Progress]: " + progressCounter + "/" + blockToProcess + " blocks proccessed");
+			//Prints progress - Per 100 blocks of results, so only shows when processing large input matracies (10x10+)
+			if((progressCounter % 100) == 0 && progressCounter != 0) {
+				System.out.println("----[Progress]: <<" + progressCounter + "/" + blockToProcess + ">> Blocks Added");
 			}
 
 			//Calls gRPC addition function on servers
