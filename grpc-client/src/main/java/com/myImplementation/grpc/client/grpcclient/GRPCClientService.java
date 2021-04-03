@@ -375,14 +375,19 @@ public class GRPCClientService {
 		System.out.println("\nb1D: " + Arrays.toString(b1D));
 		 */
 
+		//The first request can sometimes take longer than the second (as a result of processes like caching)
+		//So this call is made before footprinting to make sure that the call made during footprinting more representative of how long a call takes
+		List<com.myImplementation.grpc.array> testRequest = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(allBlocks[0][0]), TwoDimArrayToTwoDimList(allBlocks[0][0]));
+
 		//The dimentions of the array in terms of 2x2 blocks is determined by the number of blocks sqaured and stored
 		int blockDim = (int) Math.sqrt(allBlocks[0].length);
 
 		//Stores the time before gRPC functiona call
 		long startTime = System.nanoTime();
 
-		//gets a response by calling the addBlockRequest from the stub with the first block input from the queue
+		//Gets a response by calling the addBlockRequest from the stub with the first block input from the queue
 		//The result is not used as the call is exclussively made for footprinting
+		//Note, the first time making the request takes longer than consecutive requests, so the first reading may not be accurate
 		List<com.myImplementation.grpc.array> testRequest = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(allBlocks[0][0]), TwoDimArrayToTwoDimList(allBlocks[0][0]));
 
 		//Stores the time after gRPC functiona call
@@ -589,7 +594,7 @@ public class GRPCClientService {
 			if((progressCounter % 1000) == 0 && progressCounter != 0) {
 				System.out.println("> Still processing!\n----[Progress]: " + progressCounter + "/" + blockToProcess + " blocks proccessed");
 			}
-			
+
 			//Calls gRPC addition function on servers
 			return stubAddRequest(stubPool.get(stubIndex % noOfAllocatedServers), TwoDimArrayToTwoDimList(unprocessedBlockA), TwoDimArrayToTwoDimList(unprocessedBlockB));
 		}
