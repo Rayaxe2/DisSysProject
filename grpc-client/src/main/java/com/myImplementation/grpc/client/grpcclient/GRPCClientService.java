@@ -551,6 +551,12 @@ public class GRPCClientService {
 				System.out.println("\nresultingMatrix:\n " + listUnpackToString(resultingMatrix));
 				 */
 			}
+			progressCounter++;
+			//Prints progress - Per 1000 blocks of results, so only shows when processing large input matracies (100x100+)
+			if((progressCounter % 1000) == 0 && progressCounter != 0) {
+				System.out.println("> Still processing!\n----[Progress]: " + progressCounter + "/" + blockToProcess + " blocks proccessed");
+			}
+
 			return resultingMatrix;
 		}
 	}
@@ -578,6 +584,12 @@ public class GRPCClientService {
 		//Blocks are added together
 		@Override
 		public List<com.myImplementation.grpc.array> call() {
+			progressCounter++;
+			//Prints progress - Per 1000 blocks of results, so only shows when processing large input matracies (100x100+)
+			if((progressCounter % 1000) == 0 && progressCounter != 0) {
+				System.out.println("> Still processing!\n----[Progress]: " + progressCounter + "/" + blockToProcess + " blocks proccessed");
+			}
+			
 			//Calls gRPC addition function on servers
 			return stubAddRequest(stubPool.get(stubIndex % noOfAllocatedServers), TwoDimArrayToTwoDimList(unprocessedBlockA), TwoDimArrayToTwoDimList(unprocessedBlockB));
 		}
@@ -594,11 +606,6 @@ public class GRPCClientService {
 						.addAllMatrixB(mB)
 						.build()
 		);
-		progressCounter++;
-		//Prints progress - Per 1000 blocks of results, so only shows when processing large input matracies (100x100+)
-		if((progressCounter % 1000) == 0 && progressCounter != 0) {
-			System.out.println("> Still processing!\n----[Progress]: " + progressCounter + "/" + blockToProcess + " blocks proccessed");
-		}
 		return reply.getMatrixCList();
 	}
 
@@ -613,11 +620,6 @@ public class GRPCClientService {
 						.addAllMatrixB(mB)
 						.build()
 		);
-		progressCounter++;
-		//Prints progress - Per 1000 blocks of results, so only shows when processing large input matracies (100x100+)
-		if((progressCounter % 1000) == 0 && progressCounter != 0) {
-			System.out.println("> Still processing!\n----[Progress]: " + progressCounter + "/" + blockToProcess + " blocks proccessed");
-		}
 		return reply.getMatrixCList();
 	}
 
