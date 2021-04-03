@@ -44,19 +44,6 @@ public class GRPCClientService {
 	//A pool of threads are assigned the task of making multiplication and addition gRPC function calls to certain servers, via a stub,
 	//With the groups of blocks - each thread works out a block of the final matrix. The result is unpacks and formated as a string
 	public String matrixMultiplicationOperation(String mA, String mB, int dimentions, int deadline, int serverIndex) {
-
-		/*
-		//The IP in serverIPs[0] is the IP of the server we are gong to connect to - 9090 is it's port
-		ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[serverIndex], 9090).usePlaintext().build();
-		//We create a stub and pass the channel in as a parameter to link it to the server
-		MatrixMultServiceGrpc.MatrixMultServiceBlockingStub stub = MatrixMultServiceGrpc.newBlockingStub(channel);
-		//For Debugging
-		System.out.println(serverIndex);
-		System.out.println("State: " + channel.isShutdown());
-		System.out.println("State: " + channel.isTerminated());
-		System.out.println("State: " + channel.getState(false).toString());
-		 */
-
 		//The rest controller gives a string of numbers seperated by commas, we put them in a 1d string array first
 		String[] a1D = mA.split(",");
 		String[] b1D = mB.split(",");
@@ -100,27 +87,11 @@ public class GRPCClientService {
 			}
 		}
 
-		/*
-		//Used for debugging
-		System.out.println("\nMatrix A:");
-		System.out.println(Arrays.deepToString(a2D));
-
-		//Used for debugging
-		System.out.println("\na1DInt :");
-		System.out.println(Arrays.toString(a1DInt) + "\n");
-		 */
-
 		//Splits the 2 input matricies into a series of 2x2 blocks and stores them in a 4D array
 		//The 4th dimention stores an array/the set of blocks in MatrixA and an array/the set of block in MatrixB
 		//The 3rd dimention stores the Array of blocks for each Matrix
 		//The 2nd and 1st dimention store the blocks (2x2 arrays)
 		int[][][][] allBlocks = matrixToBlockList(a1DInt, b1DInt);
-
-		/*
-		//Used for debugging
-		System.out.println("\nallBlocks :");
-		System.out.println(Arrays.deepToString(allBlocks));
-		 */
 
 		//This list is used to groups blocks that are needed for a single multiplication operation -
 		//Integer[][] is for a single block
@@ -144,13 +115,6 @@ public class GRPCClientService {
 		//block (1,1) from matrix A by block (0,1) in matrix B - and so on...
 		List<Integer[][]> newQueue;
 
-		/*
-		//Used for debugging
-		System.out.println("\nAllBlocks outer Size: " + allBlocks.length);
-		System.out.println("AllBlocks inner Size: " + allBlocks[0].length);
-		System.out.println("blockDim: " + blockDim + "\n");
-		 */
-
 		//Used to determine the coordonates/possitions of the blocks we want to pair
 		int currentCol = 0;
 		int currentRow = 0;
@@ -165,25 +129,11 @@ public class GRPCClientService {
 			for (int i = 0; i < blockDim; i++) {
 				newQueue.add(IntArrayToIntergerArray(allBlocks[1][currentCol + (i * blockDim)]));
 				newQueue.add(IntArrayToIntergerArray(allBlocks[0][(currentRow * blockDim) + i]));
-
-				/*
-				//Used for debugging
-				//System.out.println("\nIndex for B " + (a + 1) + "(Pair " + (i + 1) + ")" + ":\n " + ((currentRow * blockDim) + i));
-
-				System.out.println("\nBlock from A " + (a + 1) + "(Pair " + (i + 1) + ")" + ": ");
-				System.out.println(Arrays.deepToString(allBlocks[1][currentCol + (i * blockDim)]));
-
-				System.out.println("\nBlock from B " + (a + 1) + "(Pair " + (i + 1) + ")" + ": ");
-				System.out.println(Arrays.deepToString(allBlocks[0][(currentRow * blockDim) + i]));
-				*/
 			}
 			//Adds each set of pairs of blocks that need to be multiplied to produce a single block into the list
 			//To form a queue of operations
 			atomicBlockOPQueue.add(newQueue);
 		}
-
-		//Used for debugging
-		//System.out.println("\n" + "atomicBlockOPQueue Size: " + atomicBlockOPQueue.size() + "\nContents A: \n" + Arrays.deepToString(atomicBlockOPQueue.get(0).get(0)) + "\nContents B: \n" + Arrays.deepToString(atomicBlockOPQueue.get(0).get(1)));
 
 		//The first request can sometimes take longer than the second (as a result of processes like caching)
 		//So these call are made before footprinting to make sure that the call made during footprinting more representative of how long a call takes
@@ -230,10 +180,7 @@ public class GRPCClientService {
 		//Prints new estimates, based on the number of servers assigned, on the client
 		System.out.println("[Servers Assigned]: " + serversNeeded + "\n[New Time Estimate]: " + String.valueOf((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) (1000000000.0))/serversNeeded) + " Seconds (" + String.valueOf(((int) Math.ceil(((double) footprint * ((double) blockDim * ((double) blockDim * (double) blockDim))) / (double) (1000000000.0))/serversNeeded)/60) + " Minutes, " + String.valueOf((int) ((footprint * ((blockDim * (blockDim * blockDim))) / 1000000000)/serversNeeded)%60) + " Seconds)" + "\n<================>\n");
 
-		//Used for debugging
-		//double test = (int) Math.ceil(((double) footprint * (((double) blockDim * (double) 2) * ((double) blockDim * (double) blockDim))));
 		System.out.println("Servers Needed: " + serversNeeded + "\nFootprint: " + footprint + "\nDeadline: " + deadline + "\n");
-		//+ "\nNo of Block Operations: " + String.valueOf(test)
 
 		//These theards will be used to send gRPC service requests concurrently
 		//(eliminating the need to wait for a response before sending another request)
@@ -245,11 +192,6 @@ public class GRPCClientService {
 
 		//For each set of blocks we need to work on we send the list of available stubs and the list of blocks to be used for the proccess
 		for (int i = 0; i < atomicBlockOPQueue.size(); i++) {
-			/*
-			//Used for debugging
-			System.out.println("Future no: " + (i + 1));
-			 */
-
 			//The pool of stubs and set of relevant blocks are sent to be used for the multiplication operations,
 			//Which the thread pool executes. The results are collected and stored in the list of future, "futureResults"
 			futureResults.add(
@@ -264,17 +206,7 @@ public class GRPCClientService {
 
 		//Places the resulting matrix blocks into a list of blocks
 		for (int i = 0; i < futureResults.size(); i++) {
-			/*
-			//Used for debugging
-			System.out.println("Futures Size: " + futureResults.size() + " - Loop: " + i);
-			*/
-
 			try {
-				/*
-				//Used for debugging
-				//System.out.println("listOfResults: " + Arrays.deepToString(listUnpack(futureResults.get(i).get())));
-				*/
-
 				listOfResults.add(
 						IntArrayToIntergerArray(listUnpack(futureResults.get(i).get()))
 				);
@@ -297,30 +229,6 @@ public class GRPCClientService {
 		//Makes the funciton return the result of the operation/service to the rest controller - which calls it
 		return listOfBlocksToString(listOfResults); //listOfBlocksToString converts the lists of blocks into a formatted string
 	}
-		/*
-		try {}
-		//If the channels that the stubs are associated to are invalid or assocaited to a server not running the program
-		//The the function is called again, but this time it references the next server on the list of server IPs
-		//In an attempt to find a server that is active and accepting connection and messages from the client
-		catch (IllegalArgumentException e){
-			System.out.println("Err1");
-			//If the user attempted to connect to every server in the list of IPs and failed, then an error is returned to the rest controlled
-			if(serverIndex < 7) {
-				return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
-			}
-			else {
-				return "Error: Possible cause - all servers are either inactive or unresponsive!";
-			}
-		catch (io.grpc.StatusRuntimeException e) {
-			System.out.println("Err2");
-			if(serverIndex < 7) {
-				return matrixMultiplicationOperation(mA, mB, dimentions, deadline, serverIndex + 1);
-			}
-			else {
-				return "Error: Possible cause - all servers are either inactive or unresponsive!";
-			}
-		}
-		 */
 
 	//Similar to matrixMultiplication, however it simply Splits the 2 matracies into blocks and makes a pool of threads
 	//Which are used add each coresponding blocks to eachother to form a final block matrix which is then formated into a string
@@ -373,16 +281,6 @@ public class GRPCClientService {
 		//The 3rd dimention stores the Array of blocks for each Matrix
 		//The 2nd and 1st dimention store the blocks (2x2 arrays)
 		int[][][][] allBlocks = matrixToBlockList(a1DInt, b1DInt);
-
-		/*
-		///for debugging
-		System.out.println("\na1D: " + Arrays.toString(a1D));
-		System.out.println("\nb1D: " + Arrays.toString(b1D));
-		System.out.println("\na2D: " + Arrays.deepToString(a2D));
-		System.out.println("\na2D: " + Arrays.deepToString(b2D));
-		System.out.println("\na1D: " + Arrays.toString(a1D));
-		System.out.println("\nb1D: " + Arrays.toString(b1D));
-		 */
 
 		//The first request can sometimes take longer than the second (as a result of processes like caching)
 		//So these call are made before footprinting to make sure that the call made during footprinting more representative of how long a call takes
@@ -454,10 +352,6 @@ public class GRPCClientService {
 				listOfResults.add(
 						IntArrayToIntergerArray(listUnpack(futureResults.get(i).get()))
 				);
-				/*
-				//for debugging
-				System.out.println("\nlistOfResults:\n " + Arrays.deepToString(listOfResults.get(i)));
-				 */
 			} catch (ExecutionException e) {
 				e.printStackTrace();
 			} catch (InterruptedException e) {
@@ -477,29 +371,6 @@ public class GRPCClientService {
 		//Makes the funciton return the result of the operation/service to the rest controller - which calls it
 		return listOfBlocksToString(listOfResults); //listOfBlocksToString converts the lits of blocks into a formatted string
 	}
-		/*
-		try {}
-		//If the channels that the stubs are associated to are invalid or assocaited to a server not running the program
-		//The the function is called again, but this time it references the next server on the list of server IPs
-		//In an attempt to find a server that is active and accepting connection and messages from the client
-		catch (IllegalArgumentException e){
-				//If the user attempted to connect to every server in the list of IPs and failed, then an error is returned to the rest controlled
-				if(serverIndex < 7) {
-					return matrixAdditionOperation(mA, mB, dimentions, deadline, serverIndex + 1);
-				}
-				else {
-					return "Error: Possible cause - all servers are either inactive or unresponsive!";
-				}
-			}
-		catch (io.grpc.StatusRuntimeException e) {
-				if(serverIndex < 7) {
-					return matrixAdditionOperation(mA, mB, dimentions, deadline, serverIndex + 1);
-				}
-				else {
-					return "Error: Possible cause - all servers are either inactive or unresponsive!";
-				}
-			}
-		 */
 
 	//Callable implementation
 	//<=======================>
@@ -532,10 +403,6 @@ public class GRPCClientService {
 		//The results of the multiplicate are added together via the matrix addition gRCP function
 		@Override
 		public List<com.myImplementation.grpc.array> call() {
-			/*
-			//Used for debugging
-			System.out.println("\nunprocessedBlockA:\n " + Arrays.deepToString(unprocessedBlockA));
-			*/
 			//The result of each block multiplication should be accumilated here
 			List<com.myImplementation.grpc.array> resultingMatrix = new ArrayList<com.myImplementation.grpc.array>();
 
@@ -548,12 +415,6 @@ public class GRPCClientService {
 			for (int i = 0; i < unprocessedBlockA.length; i++) {
 				multResults = stubMultRequest(stubPool.get(loadNo % noOfAllocatedServers), TwoDimArrayToTwoDimList(unprocessedBlockB[i]), TwoDimArrayToTwoDimList(unprocessedBlockA[i]));
 				loadNo++;
-				/*
-				//Used for debugging
-				System.out.println("\nMultResults (" + i + "):\n " + listUnpackToString(blockMultiplicationResponse.getMatrixCList()));
-				System.out.println("\nunprocessedBlockA[i]:\n " + Arrays.deepToString(unprocessedBlockA[i]));
-				System.out.println("\nunprocessedBlockB[i]:\n " + Arrays.deepToString(unprocessedBlockB[i]));
-				 */
 				//Accumilates the results of the multiplication into a single block
 				if (i > 0) {
 					addResults = stubAddRequest(stubPool.get(loadNo % noOfAllocatedServers), resultingMatrix, multResults);
@@ -565,10 +426,6 @@ public class GRPCClientService {
 				else {
 					resultingMatrix = multResults;
 				}
-				/*
-				//Used for debugging
-				System.out.println("\nresultingMatrix:\n " + listUnpackToString(resultingMatrix));
-				 */
 				progressCounter++;
 				//Prints progress - Per 1000 blocks that are
 				if((progressCounter % 1000) == 0 && progressCounter != 0) {
@@ -682,23 +539,8 @@ public class GRPCClientService {
 				listOfBlocksB[blockNum][1][1] = TwoToOneDB[j + matrixDim + 1 + (matrixDim * i)];
 
 				blockNum++;
-
-				/*
-				//Used for debugging
-				System.out.println("");
-				System.out.println("tempBlockB " + (blockNum + 1) + ":\n " + Arrays.deepToString(tempBlockB) + "\n");
-
-				//Used for debugging
-				System.out.println("");
-				System.out.println("listOfBlocksB Right Now:\n " + Arrays.deepToString(listOfBlocksB) + "\n");
-				 */
 			}
 		}
-		/*
-		//Used for debugging
-		//System.out.println("");
-		 */
-
 		//Puts lists of blocks into 4D block to return
 		listOfBlocksAandB[0] = listOfBlocksA;
 		listOfBlocksAandB[1] = listOfBlocksB;
