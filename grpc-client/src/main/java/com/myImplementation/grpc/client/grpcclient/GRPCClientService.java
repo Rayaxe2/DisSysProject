@@ -213,7 +213,7 @@ public class GRPCClientService {
 		}
 
 		//Prints new estimates, based on the number of servers assigned, on the client
-		System.out.println("Servers Assigned: " + serversNeeded + "\nNew time estimate: " + String.valueOf((int) ((footprint * (((blockDim * 2) * (blockDim * blockDim))) / 1000000000)/serversNeeded)) + "\n<================>")
+		System.out.println("Servers Assigned: " + serversNeeded + "\nNew time estimate: " + String.valueOf((int) ((footprint * (((blockDim * 2) * (blockDim * blockDim))) / 1000000000)/serversNeeded)) + "\n<================>");
 
 		/*
 		//Used for debugging
