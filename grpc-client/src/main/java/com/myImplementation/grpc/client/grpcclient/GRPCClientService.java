@@ -379,8 +379,10 @@ public class GRPCClientService {
 		 */
 
 		//The first request can sometimes take longer than the second (as a result of processes like caching)
-		//So this call is made before footprinting to make sure that the call made during footprinting more representative of how long a call takes
-		List<com.myImplementation.grpc.array> testRequest1 = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(allBlocks[0][0]), TwoDimArrayToTwoDimList(allBlocks[0][0]));
+		//So these call are made before footprinting to make sure that the call made during footprinting more representative of how long a call takes
+		for(int i = 0; i < 100; i++) {
+			List<com.myImplementation.grpc.array> testRequest1 = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(allBlocks[0][0]), TwoDimArrayToTwoDimList(allBlocks[0][0]));
+		}
 
 		//The dimentions of the array in terms of 2x2 blocks is determined by the number of blocks sqaured and stored
 		int blockDim = (int) Math.sqrt(allBlocks[0].length);
