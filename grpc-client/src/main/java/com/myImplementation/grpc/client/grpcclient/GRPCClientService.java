@@ -555,13 +555,12 @@ public class GRPCClientService {
 				//Used for debugging
 				System.out.println("\nresultingMatrix:\n " + listUnpackToString(resultingMatrix));
 				 */
+				progressCounter++;
+				//Prints progress - Per 1000 blocks of results, so only shows when processing large input matracies (100x100+)
+				if((progressCounter % 1000) == 0 && progressCounter != 0) {
+					System.out.println("> Still processing!\n----[Progress]: " + progressCounter + "/" + blockToProcess + " blocks proccessed");
+				}
 			}
-			progressCounter++;
-			//Prints progress - Per 1000 blocks of results, so only shows when processing large input matracies (100x100+)
-			if((progressCounter % 1000) == 0 && progressCounter != 0) {
-				System.out.println("> Still processing!\n----[Progress]: " + progressCounter + "/" + blockToProcess + " blocks proccessed");
-			}
-
 			return resultingMatrix;
 		}
 	}
