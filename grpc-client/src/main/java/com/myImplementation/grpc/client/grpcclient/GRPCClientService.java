@@ -246,7 +246,7 @@ public class GRPCClientService {
 			);
 			//Prints progress - Per 100 blocks of results, so only shows when processing large input matracies (10x10+)
 			if((i % 100) == 0 && i != 0) {
-				System.out.println("> Still processing!\n----[Current block]: " + (i * 100));
+				System.out.println("> Still processing!\n----[Current block]: " + i);
 			}
 		}
 
@@ -419,7 +419,7 @@ public class GRPCClientService {
 			);
 			//Prints progress - Per 1000 blocks of results, so only shows when processing large input matracies (100x100+)
 			if((i % 1000) == 0 && i != 0) {
-				System.out.println("> Still processing!\n----[Current block]: " + (i * 1000));
+				System.out.println("> Still processing!\n----[Current block]: " + i);
 			}
 		}
 
