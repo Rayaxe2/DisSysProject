@@ -207,7 +207,7 @@ public class GRPCClientService {
 		blockToProcess = (int) ((blockDim * 2) * (blockDim * blockDim));
 
 		//Prints estimates on client
-		System.out.println("\n<======Mult======>\n[Estimated time (One Server)]: " + String.valueOf(blockToProcess) + " Seconds \n[Number of blocks to multiply]: " + String.valueOf((blockDim * 2) * (blockDim * blockDim)) + "\n[Servers Needed to meet deadline]: " + serversNeeded + "\n");
+		System.out.println("\n<======Mult======>\n[Estimated time (One Server)]: " + String.valueOf((int) Math.ceil(((double) footprint * (((double) blockDim * 2.0) * ((double) blockDim * (double) blockDim))) / (double) ((double) deadline * 1000000000.0))) + " Seconds \n[Number of blocks to multiply]: " + String.valueOf((blockDim * 2) * (blockDim * blockDim)) + "\n[Servers Needed to meet deadline]: " + serversNeeded + "\n");
 
 		//Caps the amount of servers that can be allocated to 8
 		if (serversNeeded > 8) {
@@ -562,7 +562,7 @@ public class GRPCClientService {
 				progressCounter++;
 				//Prints progress - Per 1000 blocks that are
 				if((progressCounter % 1000) == 0 && progressCounter != 0) {
-					System.out.println("----[Progress]: <<" + progressCounter + "/" + blockToProcess + ">> Blocks Multiplied and Summed");
+					System.out.println("----[Progress]: << " + progressCounter + "/" + blockToProcess + " >> Blocks Multiplied and Summed");
 				}
 			}
 			return resultingMatrix;
@@ -595,7 +595,7 @@ public class GRPCClientService {
 			progressCounter++;
 			//Prints progress - Per 100 blocks of results, so only shows when processing large input matracies (10x10+)
 			if((progressCounter % 100) == 0 && progressCounter != 0) {
-				System.out.println("----[Progress]: <<" + progressCounter + "/" + blockToProcess + ">> Blocks Added");
+				System.out.println("----[Progress]: << " + progressCounter + "/" + blockToProcess + " >> Blocks Added");
 			}
 
 			//Calls gRPC addition function on servers
