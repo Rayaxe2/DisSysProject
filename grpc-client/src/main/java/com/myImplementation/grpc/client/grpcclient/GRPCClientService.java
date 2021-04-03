@@ -22,6 +22,8 @@ import com.myImplementation.grpc.MatrixMultServiceGrpc;
 public class GRPCClientService {
 	//List of server IPs for stubs to connect to
 	String[] serverIPs = new String[]{"34.203.38.53", "54.157.147.19", "3.83.226.8", "54.208.88.73", "54.174.173.230", "54.236.246.232", "54.166.38.17", "3.91.176.84"};
+	//Stores of list/pool of 8 stubs for the threads to use
+	List<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub> listOfStubs = initiateStubs(serverIPs,8);
 
 	static List<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub> initiateStubs(String[] ipAddresses, int noOfStubs) {
 	//Stores list/pool of stubs for the threads to use
