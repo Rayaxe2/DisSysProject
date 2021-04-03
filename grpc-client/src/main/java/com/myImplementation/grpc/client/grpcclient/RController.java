@@ -67,11 +67,6 @@ public class RController { //Previously called PingPongEndpoint
 			e.printStackTrace();
 		}
 
-		//Checks of the matrix is square and conforms to the provided dimentions
-		if((((noOfRows*noOfRows) * 2) - 1) != matrixAAsString.length() || (((noOfRows*noOfRows) * 2) - 1) != matrixBAsString.length()){
-			return "Error: The matrix is either not square, not " + noOfRows + "x" + noOfRows + " or in an incorrect format" + "\nString length of A: " + matrixAAsString.length() + "\nString length of B: " + matrixBAsString.length() + "\nShould be: " + (((noOfRows*noOfRows) * 2) - 1);
-		}
-
 		//Hands the 2 matrix inputs to the grpc client's "matrixOperations" function so it can process it and provide a response -
 		//The number of rows in the matrix is specified so the input can be formatted
 		return grpcClientService.matrixMultiplicationOperation(matrixAAsString, matrixBAsString, noOfRows, deadline, 0);
@@ -110,11 +105,6 @@ public class RController { //Previously called PingPongEndpoint
 		}
 		catch (IOException e) {
 			e.printStackTrace();
-		}
-
-		//Checks of the matrix is square and conforms to the provided dimentions
-		if((((noOfRows*noOfRows) * 2) - 1) != matrixAAsString.length() || (((noOfRows*noOfRows) * 2) - 1) != matrixBAsString.length()){
-			return "Error: The matrix is either not square, not " + noOfRows + "x" + noOfRows + " or in an incorrect format" + "\nString length of A: " + matrixAAsString.length() + "\nString length of B: " + matrixBAsString.length() + "\nShould be: " + (((noOfRows*noOfRows) * 2) - 1);
 		}
 
 		//Hands the 2 matrix inputs to the grpc client's "matrixOperations" function so it can process it and provide a response -
