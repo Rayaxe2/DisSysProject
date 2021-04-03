@@ -578,7 +578,7 @@ public class GRPCClientService {
 						.addAllMatrixB(mB)
 						.build()
 		);
-		progressCounter++
+		progressCounter++;
 		//Prints progress - Per 100 blocks of results, so only shows when processing large input matracies (10x10+)
 		if((progressCounter % 100) == 0 && progressCounter != 0) {
 			System.out.println("> Still processing!\n----[Current block]: " + progressCounter);
@@ -597,7 +597,7 @@ public class GRPCClientService {
 						.addAllMatrixB(mB)
 						.build()
 		);
-		progressCounter++
+		progressCounter++;
 		//Prints progress - Per 100 blocks of results, so only shows when processing large input matracies (10x10+)
 		if((progressCounter % 1000) == 0 && progressCounter != 0) {
 			System.out.println("> Still processing!\n----[Current block]: " + progressCounter);
