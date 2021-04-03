@@ -377,7 +377,7 @@ public class GRPCClientService {
 
 		//The first request can sometimes take longer than the second (as a result of processes like caching)
 		//So this call is made before footprinting to make sure that the call made during footprinting more representative of how long a call takes
-		List<com.myImplementation.grpc.array> testRequest = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(allBlocks[0][0]), TwoDimArrayToTwoDimList(allBlocks[0][0]));
+		List<com.myImplementation.grpc.array> testRequest1 = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(allBlocks[0][0]), TwoDimArrayToTwoDimList(allBlocks[0][0]));
 
 		//The dimentions of the array in terms of 2x2 blocks is determined by the number of blocks sqaured and stored
 		int blockDim = (int) Math.sqrt(allBlocks[0].length);
@@ -388,7 +388,7 @@ public class GRPCClientService {
 		//Gets a response by calling the addBlockRequest from the stub with the first block input from the queue
 		//The result is not used as the call is exclussively made for footprinting
 		//Note, the first time making the request takes longer than consecutive requests, so the first reading may not be accurate
-		List<com.myImplementation.grpc.array> testRequest = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(allBlocks[0][0]), TwoDimArrayToTwoDimList(allBlocks[0][0]));
+		List<com.myImplementation.grpc.array> testRequest2 = stubAddRequest(listOfStubs.get(0), TwoDimArrayToTwoDimList(allBlocks[0][0]), TwoDimArrayToTwoDimList(allBlocks[0][0]));
 
 		//Stores the time after gRPC functiona call
 		long endTime = System.nanoTime();
