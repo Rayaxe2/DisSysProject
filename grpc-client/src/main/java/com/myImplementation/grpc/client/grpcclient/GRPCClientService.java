@@ -22,8 +22,6 @@ import com.myImplementation.grpc.MatrixMultServiceGrpc;
 public class GRPCClientService {
 	//List of server IPs for stubs to connect to
 	String[] serverIPs = new String[]{"34.203.38.53", "54.157.147.19", "3.83.226.8", "54.208.88.73", "54.174.173.230", "54.236.246.232", "54.166.38.17", "3.91.176.84"};
-	//Stores of list/pool of 8 stubs for the threads to use
-	List<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub> listOfStubs = initiateStubs(serverIPs,8);
 
 	static List<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub> initiateStubs(String[] ipAddresses, int noOfStubs) {
 	//Stores list/pool of stubs for the threads to use
@@ -41,6 +39,7 @@ public class GRPCClientService {
 	//A pool of threads are assigned the task of making multiplication and addition gRPC function calls to certain servers, via a stub,
 	//With the groups of blocks - each thread works out a block of the final matrix. The result is unpacks and formated as a string
 	public String matrixMultiplicationOperation(String mA, String mB, int dimentions, int deadline, int serverIndex) {
+
 		/*
 		//The IP in serverIPs[0] is the IP of the server we are gong to connect to - 9090 is it's port
 		ManagedChannel channel = ManagedChannelBuilder.forAddress(serverIPs[serverIndex], 9090).usePlaintext().build();
@@ -398,8 +397,6 @@ public class GRPCClientService {
 
 		//These theards will be used to send gRPC service requests concurrently (eliminating the need to wait for a response before sending another request)
 		ExecutorService serverThreadPool = Executors.newFixedThreadPool(serversNeeded);
-		//Stores list/pool of stubs for the threads to use
-		List<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub> listOfStubs = initiateStubs(serverIPs, 8);
 
 		//This will store the results of each thread
 		List<Future<List<com.myImplementation.grpc.array>>> futureResults = new ArrayList<Future<List<com.myImplementation.grpc.array>>>();
