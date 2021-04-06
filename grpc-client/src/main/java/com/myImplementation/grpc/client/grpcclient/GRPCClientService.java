@@ -24,7 +24,7 @@ public class GRPCClientService {
 	static int progressCounter = 0;
 	static int blockToProcess = 0;
 	//List of server IPs for stubs to connect to
-	String[] serverIPs = new String[]{"34.203.38.53", "54.157.147.19", "3.83.226.8", "54.208.88.73", "54.174.173.230", "54.236.246.232", "54.166.38.17", "3.91.176.84"};
+	String[] serverIPs = new String[]{"34.229.71.70", "54.160.119.190", "3.87.189.188", "3.84.28.153", "3.95.150.74", "35.174.156.1", "3.95.208.207", "3.89.20.34"};
 	//Stores of list/pool of 8 stubs for the threads to use
 	List<MatrixMultServiceGrpc.MatrixMultServiceBlockingStub> listOfStubs = initiateStubs(serverIPs,8);
 

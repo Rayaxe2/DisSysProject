@@ -50,9 +50,12 @@ public class MatrixMult extends MatrixMultServiceImplBase {
 			//Mutliplies the matracies (which will always be 2x2 blocks)
 			int[][] multProduct = multiplyBlockAux(Array1, Array2);
 
+			/*
 			//Print out a message saying you received a message from the client - for the server to see/display
 			System.out.println("Multiplication Request recieved from client:\n" + request);
 			System.out.println("\n<==================>\n");
+			 */
+			System.out.println(".");
 
 			//builds a response
 			multiplyBlockResponse.Builder response = multiplyBlockResponse.newBuilder();
